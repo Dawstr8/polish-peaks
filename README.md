@@ -13,9 +13,9 @@
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React
+- **Frontend:** Next.js (React, TypeScript, Tailwind CSS)
 - **Backend:** FastAPI (Python)
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL (or SQLite for development)
 - **Containerization:** Docker (optional, for easy local setup)
 
 ## 🚀 Getting Started
@@ -40,6 +40,31 @@ source .venv/bin/activate
 pip3 install "fastapi[standard]"
 python3 -m fastapi dev main.py
 ```
+
+### 3. Frontend Setup
+
+For detailed frontend setup instructions, see the [Frontend README](./frontend/README.md).
+
+Quick start:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## 📁 Project Structure
+
+```
+polish-peaks/
+├── README.md          # Project overview and setup guide
+├── backend/           # FastAPI backend application
+│   └── README.md      # Backend development documentation
+└── frontend/          # Next.js frontend application
+    └── README.md      # Frontend development documentation
+```
+
+This is a full-stack web application with a clear separation between frontend and backend components. Each component has its own dedicated documentation for development setup and guidelines.
 
 ## ⚡ Contribution
 
