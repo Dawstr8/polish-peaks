@@ -16,9 +16,25 @@
 - **Frontend:** Next.js (React, TypeScript, Tailwind CSS)
 - **Backend:** FastAPI (Python)
 - **Database:** PostgreSQL (or SQLite for development)
-- **Containerization:** Docker (optional, for easy local setup)
+- **Development:** VS Code Dev Container (recommended)
 
 ## 🚀 Getting Started
+
+### Option A: Development Container (Recommended)
+
+The easiest way to get started is using VS Code with the development container:
+
+1. Install [VS Code](https://code.visualstudio.com/) and [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+2. Clone and open the repository in VS Code
+3. Press `Ctrl+Shift+P` → "Dev Containers: Reopen in Container"
+4. Start development: `./dev.sh`
+5. Access:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+
+For more details about the development container setup, see the [Dev Container README](./.devcontainer/README.md).
+
+### Option B: Manual Setup
 
 ### 1. Clone the repository
 
@@ -58,6 +74,9 @@ npm run dev
 ```
 polish-peaks/
 ├── README.md          # Project overview and setup guide
+├── .devcontainer/     # VS Code development container configuration
+│   └── README.md      # Development container setup guide
+├── dev.sh             # Development helper script
 ├── backend/           # FastAPI backend application
 │   └── README.md      # Backend development documentation
 └── frontend/          # Next.js frontend application

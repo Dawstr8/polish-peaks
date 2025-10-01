@@ -1,0 +1,27 @@
+{
+  "name": "Polish Peaks Dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+  "forwardPorts": [3000, 8000],
+  "postCreateCommand": "pip install -r backend/requirements.txt && cd frontend && npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers",
+        "donjayamanne.githistory",
+        "eamodio.gitlens",
+        "ms-python.python",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
