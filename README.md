@@ -11,20 +11,34 @@
 - Keep a personal record of climbing achievements
 - Track progress toward completing all major summits
 
-## 🛠️ Tech Stack (Planned)
+## 🛠️ Tech Stack
 
 - **Frontend:** React
 - **Backend:** FastAPI (Python)
-- **Database:** PostgreSQL (or SQLite for development)
+- **Database:** PostgreSQL
 - **Containerization:** Docker (optional, for easy local setup)
 
-## 🚀 Getting Started (Initial)
+## 🚀 Getting Started
 
-1. Clone the repository:
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/dawstr8/polish-peaks.git
 cd polish-peaks
+```
+
+### 2. Backend Setup
+
+For detailed backend setup instructions, see the [Backend README](./backend/README.md).
+
+Quick start:
+
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install "fastapi[standard]"
+python3 -m fastapi dev main.py
 ```
 
 ## ⚡ Contribution
