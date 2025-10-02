@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "prepare": "husky",
+    "format:frontend": "cd frontend && npx prettier --write --ignore-unknown . && npx eslint --fix .",
+    "format:backend": "cd backend && black --quiet . && isort --profile black ."
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.3"
+  },
+  "lint-staged": {
+    "frontend/**/*.{js,ts,tsx,jsx}": [
+      "sh -c 'cd frontend && eslint --fix \"$@\"' --",
+      "sh -c 'cd frontend && prettier --write --ignore-unknown \"$@\"' --"
+    ],
+    "backend/**/*.py": [
+      "sh -c 'cd backend && black --quiet \"$@\"' --",
+      "sh -c 'cd backend && isort --profile black \"$@\"' --"
+    ]
+  }
+}

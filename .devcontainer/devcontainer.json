@@ -10,7 +10,7 @@
     }
   },
   "forwardPorts": [3000, 8000],
-  "postCreateCommand": "pip install -r backend/requirements.txt && cd frontend && npm install",
+  "postCreateCommand": "npm install && pip install -r backend/requirements.txt && cd frontend && npm install",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -20,8 +20,27 @@
         "eamodio.gitlens",
         "ms-python.python",
         "bradlc.vscode-tailwindcss",
-        "esbenp.prettier-vscode"
-      ]
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-python.black-formatter",
+        "ms-python.isort"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+          }
+        },
+        "python.formatting.provider": "black",
+        "isort.args": ["--profile", "black"]
+      }
     }
   }
 }
