@@ -1,10 +1,11 @@
-from fastapi import FastAPI
 from datetime import datetime
+
+from fastapi import FastAPI
 
 app = FastAPI(
     title="Polish Peaks API",
     description="API for managing Polish mountain summit photos and achievements",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 
@@ -14,5 +15,5 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
-        "service": "Polish Peaks API"
+        "service": "Polish Peaks API",
     }
