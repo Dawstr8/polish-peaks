@@ -1,5 +1,6 @@
 {
   "scripts": {
-    "format:backend": "cd backend && black . && isort ."
+    "format:backend": "cd backend && black . && isort .",
+    "format:frontend": "cd frontend && npm run format"
   }
 }
