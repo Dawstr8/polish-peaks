@@ -69,6 +69,17 @@ npm install
 npm run dev
 ```
 
+## 🧪 Testing
+
+The backend includes automated tests written with `pytest` (covering services, storage, and API behavior).
+
+Run the backend test suite:
+
+```bash
+cd backend
+pytest -q
+```
+
 ## 📁 Project Structure
 
 ```
