@@ -1,5 +1,6 @@
 fastapi[standard]>=0.118.0
 exif>=1.6.1
+sqlmodel>=0.0.25
 
 # Development dependencies
 black>=25.9.0
