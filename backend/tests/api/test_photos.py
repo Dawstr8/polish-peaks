@@ -6,8 +6,8 @@ import pytest
 
 from app.api.endpoints import photos
 from app.core.interfaces.metadata_extractor import MetadataExtractorInterface
-from app.services.photo_service import PhotoService
 from app.services.storage.local_storage import LocalFileStorage
+from app.services.upload_service import UploadService
 from main import app
 
 
@@ -26,11 +26,11 @@ def override_photo_dependency(test_upload_dir):
     """Override the photo service dependency to isolate filesystem writes."""
 
     def _get_service():
-        return PhotoService(LocalFileStorage(upload_dir=str(test_upload_dir)))
+        return UploadService(LocalFileStorage(upload_dir=str(test_upload_dir)))
 
-    app.dependency_overrides[photos.get_photo_service] = _get_service
+    app.dependency_overrides[photos.get_upload_service] = _get_service
     yield
-    app.dependency_overrides.pop(photos.get_photo_service, None)
+    app.dependency_overrides.pop(photos.get_upload_service, None)
 
 
 def test_upload_photo_success(client):

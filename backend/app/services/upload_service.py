@@ -6,7 +6,7 @@ from fastapi import UploadFile
 from app.core.interfaces.storage import StorageInterface
 
 
-class PhotoService:
+class UploadService:
     def __init__(self, storage: StorageInterface):
         self._storage = storage
 
