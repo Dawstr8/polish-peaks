@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
+from app.core.interfaces.metadata_extractor import MetadataExtractorInterface
+from app.services.exif_metadata_extractor import ExifMetadataExtractor
 from app.services.photo_service import PhotoService
 from app.services.storage.local_storage import LocalFileStorage
 
@@ -11,10 +13,15 @@ def get_photo_service():
     return PhotoService(storage)
 
 
+def get_metadata_extractor() -> MetadataExtractorInterface:
+    return ExifMetadataExtractor()
+
+
 @router.post("/upload")
 async def upload_photo(
     file: UploadFile = File(...),
     photo_service: PhotoService = Depends(get_photo_service),
+    metadata_extractor: MetadataExtractorInterface = Depends(get_metadata_extractor),
 ):
     """
     Upload a photo file
@@ -24,7 +31,9 @@ async def upload_photo(
     """
     try:
         path = await photo_service.save_photo(file)
-        return {"success": True, "path": path}
+        metadata = metadata_extractor.extract(path)
+
+        return {"success": True, "path": path, "metadata": metadata}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
