@@ -5,16 +5,16 @@ from app.core.interfaces.metadata_extractor import MetadataExtractorInterface
 from app.database import get_session
 from app.services.exif_metadata_extractor import ExifMetadataExtractor
 from app.services.peak_matcher import PeakMatcher
-from app.services.photo_service import PhotoService
 from app.services.storage.local_storage import LocalFileStorage
+from app.services.upload_service import UploadService
 from app.utils.geo import dms_to_decimal
 
 router = APIRouter()
 
 
-def get_photo_service():
+def get_upload_service():
     storage = LocalFileStorage()
-    return PhotoService(storage)
+    return UploadService(storage)
 
 
 def get_metadata_extractor() -> MetadataExtractorInterface:
@@ -24,7 +24,7 @@ def get_metadata_extractor() -> MetadataExtractorInterface:
 @router.post("/upload")
 async def upload_photo(
     file: UploadFile = File(...),
-    photo_service: PhotoService = Depends(get_photo_service),
+    upload_service: UploadService = Depends(get_upload_service),
     metadata_extractor: MetadataExtractorInterface = Depends(get_metadata_extractor),
     session: Session = Depends(get_session),
 ):
@@ -35,7 +35,7 @@ async def upload_photo(
         dict: Contains the path/URL of the uploaded photo, metadata, and matched peak information
     """
     try:
-        path = await photo_service.save_photo(file)
+        path = await upload_service.save_photo(file)
         metadata = metadata_extractor.extract(path)
 
         matched_peak_info = None
@@ -71,7 +71,7 @@ async def upload_photo(
 
 @router.delete("/{filename}")
 async def delete_photo(
-    filename: str, photo_service: PhotoService = Depends(get_photo_service)
+    filename: str, upload_service: UploadService = Depends(get_upload_service)
 ):
     """
     Delete an uploaded photo
@@ -82,7 +82,7 @@ async def delete_photo(
     Returns:
         dict: Success status of the operation
     """
-    success = await photo_service.delete_photo(filename)
+    success = await upload_service.delete_photo(filename)
 
     if not success:
         raise HTTPException(status_code=404, detail="Photo not found")
