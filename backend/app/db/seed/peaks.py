@@ -53,8 +53,8 @@ def seed_peaks():
         {
             "name": "Kalenica",
             "elevation": 964,
-            "latitude": 50.7667,
-            "longitude": 16.2833,
+            "latitude": 50.6428,
+            "longitude": 16.5464,
             "range": "Góry Sowie",
         },
     ]

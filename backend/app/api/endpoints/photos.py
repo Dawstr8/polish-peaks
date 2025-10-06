@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from sqlmodel import Session
 
 from app.core.interfaces.metadata_extractor import MetadataExtractorInterface
+from app.database import get_session
 from app.services.exif_metadata_extractor import ExifMetadataExtractor
+from app.services.peak_matcher import PeakMatcher
 from app.services.photo_service import PhotoService
 from app.services.storage.local_storage import LocalFileStorage
+from app.utils.geo import dms_to_decimal
 
 router = APIRouter()
 
@@ -22,22 +26,47 @@ async def upload_photo(
     file: UploadFile = File(...),
     photo_service: PhotoService = Depends(get_photo_service),
     metadata_extractor: MetadataExtractorInterface = Depends(get_metadata_extractor),
+    session: Session = Depends(get_session),
 ):
     """
-    Upload a photo file
+    Upload a photo file and find matching peaks
 
     Returns:
-        dict: Contains the path/URL of the uploaded photo
+        dict: Contains the path/URL of the uploaded photo, metadata, and matched peak information
     """
     try:
         path = await photo_service.save_photo(file)
         metadata = metadata_extractor.extract(path)
 
-        return {"success": True, "path": path, "metadata": metadata}
+        matched_peak_info = None
+        if metadata.get("gps_latitude") and metadata.get("gps_longitude"):
+            peak_matcher = PeakMatcher(session)
+            match_result = peak_matcher.find_nearest_peak(
+                latitude=dms_to_decimal(metadata["gps_latitude"]),
+                longitude=dms_to_decimal(metadata["gps_longitude"]),
+                max_distance_m=5000.0,
+            )
+
+            if match_result:
+                peak, distance = match_result
+                matched_peak_info = {
+                    "id": peak.id,
+                    "name": peak.name,
+                    "elevation": peak.elevation,
+                    "range": peak.range,
+                    "distance_m": round(distance, 2),
+                }
+
+        return {
+            "success": True,
+            "path": path,
+            "metadata": metadata,
+            "matched_peak": matched_peak_info,
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to upload photo")
+        raise HTTPException(status_code=500, detail=f"Failed to upload photo: {str(e)}")
 
 
 @router.delete("/{filename}")
