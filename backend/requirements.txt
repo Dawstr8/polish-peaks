@@ -1,4 +1,5 @@
 fastapi[standard]>=0.118.0
+exif>=1.6.1
 
 # Development dependencies
 black>=25.9.0
