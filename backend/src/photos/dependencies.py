@@ -10,6 +10,7 @@ from fastapi import Depends
 from src.database.core import DbSession
 from src.peaks.repository import PeakRepository
 from src.peaks.service import PeakService
+from src.photos.repository import PhotoRepository
 from src.photos.service import PhotoService
 from src.photos.services.exif_metadata_extractor import ExifMetadataExtractor
 from src.photos.services.metadata_extractor import MetadataExtractorInterface
@@ -34,13 +35,21 @@ def get_peak_service(db: DbSession) -> PeakService:
     return PeakService(repository)
 
 
+def get_photo_repository(db: DbSession) -> PhotoRepository:
+    """Provides a PhotoRepository."""
+    return PhotoRepository(db)
+
+
 def get_photo_service(
     upload_service: UploadService = Depends(get_upload_service),
     metadata_extractor: MetadataExtractorInterface = Depends(get_metadata_extractor),
     peak_service: PeakService = Depends(get_peak_service),
+    photo_repository: PhotoRepository = Depends(get_photo_repository),
 ) -> PhotoService:
     """Provides a PhotoService with all required dependencies."""
-    return PhotoService(upload_service, metadata_extractor, peak_service)
+    return PhotoService(
+        upload_service, metadata_extractor, peak_service, photo_repository
+    )
 
 
 PhotoServiceDep = Annotated[PhotoService, Depends(get_photo_service)]

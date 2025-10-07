@@ -37,12 +37,10 @@ def test_find_nearest_peak():
     service = PeakService(mock_repo)
 
     near_rysy = (49.1794, 20.0880)
-    result = service.find_nearest_peak(
+    peak, distance = service.find_nearest_peak(
         latitude=near_rysy[0], longitude=near_rysy[1], max_distance_m=5000.0
     )
 
-    assert result is not None
-    peak, distance = result
     assert peak.id == 1
     assert peak.name == "Rysy"
     assert distance < 100
@@ -58,11 +56,12 @@ def test_find_nearest_peak_no_peaks():
     service = PeakService(mock_repo)
 
     near_rysy = (49.1794, 20.0880)
-    result = service.find_nearest_peak(
+    peak, distance = service.find_nearest_peak(
         latitude=near_rysy[0], longitude=near_rysy[1], max_distance_m=5000.0
     )
 
-    assert result is None
+    assert peak is None
+    assert distance is None
 
     mock_repo.get_all.assert_called_once()
 
@@ -84,10 +83,11 @@ def test_find_nearest_peak_none_in_range():
     service = PeakService(mock_repo)
 
     warsaw = (52.2297, 21.0122)
-    result = service.find_nearest_peak(
+    peak, distance = service.find_nearest_peak(
         latitude=warsaw[0], longitude=warsaw[1], max_distance_m=5000.0
     )
 
-    assert result is None
+    assert peak is None
+    assert distance is None
 
     mock_repo.get_all.assert_called_once()

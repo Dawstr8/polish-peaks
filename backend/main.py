@@ -7,18 +7,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api import register_routes
 from src.database.core import create_db_and_tables
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Creating database tables...")
+    create_db_and_tables()
+    print("Database tables created successfully")
+    yield
+    pass
+
+
 app = FastAPI(
     title="Polish Peaks API",
     description="API for managing Polish mountain summit photos and achievements",
     version="1.0.0",
 )
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    create_db_and_tables()
-    yield
-    pass
 
 
 app.add_middleware(
