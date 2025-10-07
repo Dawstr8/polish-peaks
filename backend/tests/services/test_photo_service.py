@@ -2,6 +2,7 @@
 Tests for the PhotoService
 """
 
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -10,6 +11,8 @@ from fastapi import UploadFile
 from src.common.utils.geo import dms_to_decimal
 from src.peaks.model import Peak
 from src.peaks.service import PeakService
+from src.photos.model import SummitPhoto
+from src.photos.repository import PhotoRepository
 from src.photos.service import PhotoService
 from src.photos.services.metadata_extractor import MetadataExtractorInterface
 from src.uploads.service import UploadService
@@ -39,9 +42,34 @@ def mock_peak_service():
 
 
 @pytest.fixture
-def photo_service(mock_upload_service, mock_metadata_extractor, mock_peak_service):
+def mock_photo_repository():
+    """Create a mock photo repository"""
+    repo = MagicMock(spec=PhotoRepository)
+
+    def save_photo(photo):
+        photo.id = 1
+        return photo
+
+    repo.save.side_effect = save_photo
+    repo.get_by_id.return_value = SummitPhoto(id=1, file_name="test-photo.jpg")
+    repo.delete.return_value = True
+    return repo
+
+
+@pytest.fixture
+def photo_service(
+    mock_upload_service,
+    mock_metadata_extractor,
+    mock_peak_service,
+    mock_photo_repository,
+):
     """Create a PhotoService with mocked dependencies"""
-    return PhotoService(mock_upload_service, mock_metadata_extractor, mock_peak_service)
+    return PhotoService(
+        mock_upload_service,
+        mock_metadata_extractor,
+        mock_peak_service,
+        mock_photo_repository,
+    )
 
 
 @pytest.fixture
@@ -60,6 +88,7 @@ async def test_process_photo_upload_with_matching_peak(
     mock_upload_service,
     mock_metadata_extractor,
     mock_peak_service,
+    mock_photo_repository,
 ):
     """Test processing a photo upload with matching peak"""
     near_rysy = [(49, 10, 45.84), (20, 5, 16.8)]
@@ -84,15 +113,14 @@ async def test_process_photo_upload_with_matching_peak(
 
     result = await photo_service.process_photo_upload(mock_file)
 
-    assert result["success"] is True
-    assert result["path"] == "/uploads/test-photo.jpg"
-    assert result["metadata"] == metadata
-    assert result["matched_peak"] is not None
-    assert result["matched_peak"]["id"] == 1
-    assert result["matched_peak"]["name"] == "Rysy"
-    assert result["matched_peak"]["elevation"] == 2499
-    assert result["matched_peak"]["range"] == "Tatry"
-    assert result["matched_peak"]["distance_m"] == round(distance, 2)
+    assert result.id == 1
+    assert result.file_name == "test-photo.jpg"
+    assert result.peak_id == 1
+    assert result.distance_to_peak == distance
+    assert result.captured_at == datetime(2025, 10, 6, 14, 30, 0)
+    assert result.altitude == 2450.0
+    assert result.latitude == dms_to_decimal(near_rysy[0])
+    assert result.longitude == dms_to_decimal(near_rysy[1])
 
     mock_upload_service.save_file.assert_called_once_with(
         mock_file, content_type_prefix="image/"
@@ -101,8 +129,9 @@ async def test_process_photo_upload_with_matching_peak(
     mock_peak_service.find_nearest_peak.assert_called_once_with(
         latitude=dms_to_decimal(metadata["gps_latitude"]),
         longitude=dms_to_decimal(metadata["gps_longitude"]),
-        max_distance_m=5000.0,
+        max_distance_m=1000.0,
     )
+    mock_photo_repository.save.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -112,6 +141,7 @@ async def test_process_photo_upload_no_matching_peak(
     mock_upload_service,
     mock_metadata_extractor,
     mock_peak_service,
+    mock_photo_repository,
 ):
     """Test processing a photo upload with no matching peak"""
     warsaw = [(52, 13, 46.92), (21, 0, 43.92)]
@@ -123,20 +153,25 @@ async def test_process_photo_upload_no_matching_peak(
     }
     mock_metadata_extractor.extract.return_value = metadata
 
-    mock_peak_service.find_nearest_peak.return_value = None
+    mock_peak_service.find_nearest_peak.return_value = (None, None)
 
     result = await photo_service.process_photo_upload(mock_file)
 
-    assert result["success"] is True
-    assert result["path"] == "/uploads/test-photo.jpg"
-    assert result["metadata"] == metadata
-    assert result["matched_peak"] is None
+    assert result.id == 1
+    assert result.file_name == "test-photo.jpg"
+    assert result.peak_id is None
+    assert result.distance_to_peak is None
+    assert result.captured_at == datetime(2025, 10, 6, 14, 30, 0)
+    assert result.altitude == 120.0
+    assert result.latitude == dms_to_decimal(warsaw[0])
+    assert result.longitude == dms_to_decimal(warsaw[1])
 
     mock_upload_service.save_file.assert_called_once_with(
         mock_file, content_type_prefix="image/"
     )
     mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
     mock_peak_service.find_nearest_peak.assert_called_once()
+    mock_photo_repository.save.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -146,6 +181,7 @@ async def test_process_photo_upload_without_gps_data(
     mock_upload_service,
     mock_metadata_extractor,
     mock_peak_service,
+    mock_photo_repository,
 ):
     """Test processing a photo upload without GPS data"""
     metadata = {
@@ -156,33 +192,98 @@ async def test_process_photo_upload_without_gps_data(
 
     result = await photo_service.process_photo_upload(mock_file)
 
-    assert result["success"] is True
-    assert result["path"] == "/uploads/test-photo.jpg"
-    assert result["metadata"] == metadata
-    assert result["matched_peak"] is None
+    assert result.id == 1
+    assert result.file_name == "test-photo.jpg"
+    assert result.peak_id is None
+    assert result.distance_to_peak is None
+    assert result.captured_at == datetime(2025, 10, 6, 16, 45, 20)
+    assert result.altitude is None
+    assert result.latitude is None
+    assert result.longitude is None
 
     mock_upload_service.save_file.assert_called_once_with(
         mock_file, content_type_prefix="image/"
     )
     mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
     mock_peak_service.find_nearest_peak.assert_not_called()
+    mock_photo_repository.save.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_delete_photo_success(photo_service, mock_upload_service):
+async def test_process_photo_upload_without_metadata(
+    photo_service,
+    mock_file,
+    mock_upload_service,
+    mock_metadata_extractor,
+    mock_peak_service,
+    mock_photo_repository,
+):
+    """Test processing a photo upload without metadata"""
+    metadata = {
+        "captured_at": None,
+        "gps_latitude": None,
+        "gps_longitude": None,
+        "gps_altitude": None,
+    }
+    mock_metadata_extractor.extract.return_value = metadata
+
+    result = await photo_service.process_photo_upload(mock_file)
+
+    assert result.id == 1
+    assert result.file_name == "test-photo.jpg"
+    assert result.peak_id is None
+    assert result.distance_to_peak is None
+    assert result.captured_at is None
+    assert result.altitude is None
+    assert result.latitude is None
+    assert result.longitude is None
+
+    mock_upload_service.save_file.assert_called_once_with(
+        mock_file, content_type_prefix="image/"
+    )
+    mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
+    mock_peak_service.find_nearest_peak.assert_not_called()
+    mock_photo_repository.save.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_delete_photo_success(
+    photo_service, mock_upload_service, mock_photo_repository
+):
     """Test deleting a photo successfully"""
-    result = await photo_service.delete_photo("test-photo.jpg")
+    photo_id = 1
+    result = await photo_service.delete_photo(photo_id)
 
     assert result is True
+    mock_photo_repository.get_by_id.assert_called_once_with(photo_id)
     mock_upload_service.delete_file.assert_called_once_with("test-photo.jpg")
+    mock_photo_repository.delete.assert_called_once_with(photo_id)
 
 
 @pytest.mark.asyncio
-async def test_delete_photo_failure(photo_service, mock_upload_service):
-    """Test deleting a photo that doesn't exist"""
+async def test_delete_photo_failure_no_file(
+    photo_service, mock_upload_service, mock_photo_repository
+):
+    """Test deleting a photo when the file deletion fails"""
+    photo_id = 1
     mock_upload_service.delete_file.return_value = False
 
-    result = await photo_service.delete_photo("nonexistent.jpg")
+    result = await photo_service.delete_photo(photo_id)
 
     assert result is False
-    mock_upload_service.delete_file.assert_called_once_with("nonexistent.jpg")
+    mock_photo_repository.get_by_id.assert_called_once_with(photo_id)
+    mock_upload_service.delete_file.assert_called_once_with("test-photo.jpg")
+    mock_photo_repository.delete.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_delete_photo_failure_not_found(photo_service, mock_photo_repository):
+    """Test deleting a photo that doesn't exist"""
+    photo_id = 999
+    mock_photo_repository.get_by_id.return_value = None
+
+    result = await photo_service.delete_photo(photo_id)
+
+    assert result is False
+    mock_photo_repository.get_by_id.assert_called_once_with(photo_id)
+    mock_photo_repository.delete.assert_not_called()

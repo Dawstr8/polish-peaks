@@ -2,7 +2,7 @@
 Service for matching geographical coordinates to peaks
 """
 
-from typing import Optional, Tuple
+from typing import Tuple, Union
 
 from src.common.utils.geo import haversine_distance
 from src.peaks.model import Peak
@@ -26,7 +26,7 @@ class PeakService:
 
     def find_nearest_peak(
         self, latitude: float, longitude: float, max_distance_m: float = 5000.0
-    ) -> Optional[Tuple[Peak, float]]:
+    ) -> Union[Tuple[Peak, float], Tuple[None, None]]:
         """
         Find the nearest peak to the given coordinates.
 
@@ -36,13 +36,13 @@ class PeakService:
             max_distance_m: Maximum distance in meters to search for peaks
 
         Returns:
-            A tuple containing the nearest peak and its distance in meters,
-            or None if no peak is found within the maximum distance
+            Union[Tuple[Peak, float], Tuple[None, None]]: The nearest peak and its distance in meters,
+            or Tuple[None, None] if no peak is within the max distance
         """
         peaks = self.peak_repository.get_all()
 
         if not peaks:
-            return None
+            return self._empty()
 
         peak_distances = [
             (
@@ -59,6 +59,14 @@ class PeakService:
         ]
 
         if not nearby_peaks:
-            return None
+            return self._empty()
 
         return min(nearby_peaks, key=lambda x: x[1])
+
+    def _empty(self) -> Tuple[None, None]:
+        """Return an empty result tuple when no peaks are found.
+
+        Returns:
+            Tuple[None, None]: A tuple with two None values
+        """
+        return (None, None)
