@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from src.common.utils.geo import dms_to_decimal
 from src.database.core import DbSession
-from src.peaks.services.peak_matcher import PeakMatcher
+from src.peaks.repository import PeakRepository
+from src.peaks.service import PeakService
 from src.photos.services.exif_metadata_extractor import ExifMetadataExtractor
 from src.photos.services.metadata_extractor import MetadataExtractorInterface
 from src.uploads.service import UploadService
@@ -20,12 +21,26 @@ def get_metadata_extractor() -> MetadataExtractorInterface:
     return ExifMetadataExtractor()
 
 
+def get_peak_service(db: DbSession) -> PeakService:
+    """
+    Dependency to get an instance of the PeakService.
+
+    Args:
+        db: Database session
+
+    Returns:
+        PeakService instance
+    """
+    repository = PeakRepository(db)
+    return PeakService(repository)
+
+
 @router.post("/upload")
 async def upload_photo(
-    db: DbSession,
     file: UploadFile = File(...),
     upload_service: UploadService = Depends(get_upload_service),
     metadata_extractor: MetadataExtractorInterface = Depends(get_metadata_extractor),
+    peak_service: PeakService = Depends(get_peak_service),
 ):
     """
     Upload a photo file and find matching peaks
@@ -39,8 +54,7 @@ async def upload_photo(
 
         matched_peak_info = None
         if metadata.get("gps_latitude") and metadata.get("gps_longitude"):
-            peak_matcher = PeakMatcher(db)
-            match_result = peak_matcher.find_nearest_peak(
+            match_result = peak_service.find_nearest_peak(
                 latitude=dms_to_decimal(metadata["gps_latitude"]),
                 longitude=dms_to_decimal(metadata["gps_longitude"]),
                 max_distance_m=5000.0,
