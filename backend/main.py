@@ -4,8 +4,8 @@ from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.endpoints import peaks, photos
-from app.database import create_db_and_tables
+from src.api import register_routes
+from src.database.core import create_db_and_tables
 
 app = FastAPI(
     title="Polish Peaks API",
@@ -29,8 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(photos.router, prefix="/api/photos", tags=["photos"])
-app.include_router(peaks.router, prefix="/api/peaks", tags=["peaks"])
+register_routes(app)
 
 
 @app.get("/health")

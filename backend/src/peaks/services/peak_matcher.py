@@ -6,8 +6,8 @@ from typing import Optional, Tuple
 
 from sqlmodel import Session, select
 
-from app.models.peak import Peak
-from app.utils.geo import haversine_distance
+from src.common.utils.geo import haversine_distance
+from src.peaks.model import Peak
 
 
 class PeakMatcher:

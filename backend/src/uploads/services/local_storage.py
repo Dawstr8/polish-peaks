@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastapi import UploadFile
 
-from app.core.interfaces.storage import StorageInterface
+from src.uploads.services.storage import StorageInterface
 
 
 class LocalFileStorage(StorageInterface):

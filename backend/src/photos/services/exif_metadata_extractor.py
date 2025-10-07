@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from exif import Image as ExifImage
 
-from app.core.interfaces.metadata_extractor import MetadataExtractorInterface
+from src.photos.services.metadata_extractor import MetadataExtractorInterface
 
 
 class ExifMetadataExtractor(MetadataExtractorInterface):

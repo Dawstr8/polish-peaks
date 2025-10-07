@@ -4,7 +4,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from app.services.exif_metadata_extractor import ExifMetadataExtractor
+from src.photos.services.exif_metadata_extractor import ExifMetadataExtractor
 
 
 class MockExifImage:
@@ -39,7 +39,7 @@ def test_extract_with_exif_data(image_path):
     extractor = ExifMetadataExtractor()
 
     with patch(
-        "app.services.exif_metadata_extractor.ExifImage",
+        "src.photos.services.exif_metadata_extractor.ExifImage",
         return_value=MockExifImage(has_exif=True),
     ):
         metadata = extractor.extract(image_path)
@@ -55,7 +55,7 @@ def test_extract_without_exif_data(image_path):
     extractor = ExifMetadataExtractor()
 
     with patch(
-        "app.services.exif_metadata_extractor.ExifImage",
+        "src.photos.services.exif_metadata_extractor.ExifImage",
         return_value=MockExifImage(has_exif=False),
     ):
         metadata = extractor.extract(image_path)

@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from app.api.endpoints import photos
-from app.core.interfaces.metadata_extractor import MetadataExtractorInterface
-from app.services.storage.local_storage import LocalFileStorage
-from app.services.upload_service import UploadService
 from main import app
+from src.photos import controller
+from src.photos.services.metadata_extractor import MetadataExtractorInterface
+from src.uploads.service import UploadService
+from src.uploads.services.local_storage import LocalFileStorage
 
 
 class MockMetadataExtractor(MetadataExtractorInterface):
@@ -28,9 +28,9 @@ def override_photo_dependency(test_upload_dir):
     def _get_service():
         return UploadService(LocalFileStorage(upload_dir=str(test_upload_dir)))
 
-    app.dependency_overrides[photos.get_upload_service] = _get_service
+    app.dependency_overrides[controller.get_upload_service] = _get_service
     yield
-    app.dependency_overrides.pop(photos.get_upload_service, None)
+    app.dependency_overrides.pop(controller.get_upload_service, None)
 
 
 def test_upload_photo_success(client):
@@ -53,7 +53,7 @@ def test_upload_invalid_file_type(client):
     )
 
     assert resp.status_code == 400
-    assert resp.json()["detail"] == "File must be a photo"
+    assert resp.json()["detail"] == "File must be of type image/"
 
 
 def test_upload_with_matching_peak(client_with_db, test_peaks):
@@ -73,7 +73,9 @@ def test_upload_with_matching_peak(client_with_db, test_peaks):
     def _get_metadata_extractor():
         return MockMetadataExtractor(metadata)
 
-    app.dependency_overrides[photos.get_metadata_extractor] = _get_metadata_extractor
+    app.dependency_overrides[controller.get_metadata_extractor] = (
+        _get_metadata_extractor
+    )
 
     try:
         resp = client_with_db.post(
@@ -102,7 +104,7 @@ def test_upload_with_matching_peak(client_with_db, test_peaks):
         assert data["matched_peak"]["distance_m"] < 20
 
     finally:
-        app.dependency_overrides.pop(photos.get_metadata_extractor, None)
+        app.dependency_overrides.pop(controller.get_metadata_extractor, None)
 
 
 def test_upload_with_no_matching_peak(client_with_db, test_peaks):
@@ -122,7 +124,9 @@ def test_upload_with_no_matching_peak(client_with_db, test_peaks):
     def _get_metadata_extractor():
         return MockMetadataExtractor(metadata)
 
-    app.dependency_overrides[photos.get_metadata_extractor] = _get_metadata_extractor
+    app.dependency_overrides[controller.get_metadata_extractor] = (
+        _get_metadata_extractor
+    )
 
     try:
         # Upload photo
@@ -148,7 +152,7 @@ def test_upload_with_no_matching_peak(client_with_db, test_peaks):
         assert data["matched_peak"] is None
 
     finally:
-        app.dependency_overrides.pop(photos.get_metadata_extractor, None)
+        app.dependency_overrides.pop(controller.get_metadata_extractor, None)
 
 
 def test_upload_without_gps_data(client_with_db):
@@ -164,7 +168,9 @@ def test_upload_without_gps_data(client_with_db):
     def _get_metadata_extractor():
         return MockMetadataExtractor(metadata)
 
-    app.dependency_overrides[photos.get_metadata_extractor] = _get_metadata_extractor
+    app.dependency_overrides[controller.get_metadata_extractor] = (
+        _get_metadata_extractor
+    )
 
     try:
         resp = client_with_db.post(
@@ -185,7 +191,7 @@ def test_upload_without_gps_data(client_with_db):
         assert data["matched_peak"] is None
 
     finally:
-        app.dependency_overrides.pop(photos.get_metadata_extractor, None)
+        app.dependency_overrides.pop(controller.get_metadata_extractor, None)
 
 
 def test_delete_photo_success(client):
