@@ -10,7 +10,7 @@
     }
   },
   "forwardPorts": [3000, 8000],
-  "postCreateCommand": "npm install && pip install -r backend/requirements.txt && cd frontend && npm install",
+  "postCreateCommand": "./.devcontainer/postCreate.sh",
   "customizations": {
     "vscode": {
       "extensions": [
