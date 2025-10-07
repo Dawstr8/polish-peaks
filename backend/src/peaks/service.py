@@ -4,26 +4,25 @@ Service for matching geographical coordinates to peaks
 
 from typing import Optional, Tuple
 
-from sqlmodel import Session, select
-
 from src.common.utils.geo import haversine_distance
 from src.peaks.model import Peak
+from src.peaks.repository import PeakRepository
 
 
-class PeakMatcher:
+class PeakService:
     """
     Service for matching geographical coordinates to peaks
     based on haversine distance calculation.
     """
 
-    def __init__(self, session: Session):
+    def __init__(self, peak_repository: PeakRepository):
         """
-        Initialize the PeakMatcher service
+        Initialize the PeakService
 
         Args:
-            session: SQLModel database session
+            peak_repository: Repository for accessing peak data
         """
-        self.session = session
+        self.peak_repository = peak_repository
 
     def find_nearest_peak(
         self, latitude: float, longitude: float, max_distance_m: float = 5000.0
@@ -40,7 +39,7 @@ class PeakMatcher:
             A tuple containing the nearest peak and its distance in meters,
             or None if no peak is found within the maximum distance
         """
-        peaks = self.session.exec(select(Peak)).all()
+        peaks = self.peak_repository.get_all()
 
         if not peaks:
             return None
