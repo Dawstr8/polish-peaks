@@ -1,8 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, select
 
-from app.models.peak import Peak
+from src.peaks.model import Peak
 
 
 def test_get_peaks(client_with_db: TestClient, test_peaks: list[Peak]):

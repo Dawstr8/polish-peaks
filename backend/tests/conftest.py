@@ -8,10 +8,10 @@ from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 from starlette.datastructures import Headers
 
-from app.database import get_session
-from app.models.peak import Peak
-from app.services.storage.local_storage import LocalFileStorage
 from main import app
+from src.database.core import get_db
+from src.peaks.model import Peak
+from src.uploads.services.local_storage import LocalFileStorage
 
 
 @pytest.fixture
@@ -22,16 +22,16 @@ def client():
 
 
 @pytest.fixture
-def client_with_db(test_session):
+def client_with_db(test_db):
     """
     Create a test client with a test database session.
-    Reuses the test_session fixture for database operations.
+    Reuses the test_db fixture for database operations.
     """
 
-    def override_get_session():
-        yield test_session
+    def override_get_db():
+        yield test_db
 
-    app.dependency_overrides[get_session] = override_get_session
+    app.dependency_overrides[get_db] = override_get_db
 
     with TestClient(app) as test_client:
         yield test_client
@@ -40,7 +40,7 @@ def client_with_db(test_session):
 
 
 @pytest.fixture
-def test_session():
+def test_db():
     """
     Create a test database session with an in-memory SQLite database.
     """
@@ -52,12 +52,12 @@ def test_session():
     )
     SQLModel.metadata.create_all(engine)
 
-    with Session(engine) as session:
-        yield session
+    with Session(engine) as db:
+        yield db
 
 
 @pytest.fixture
-def test_peaks(test_session: Session):
+def test_peaks(test_db: Session):
     """Create test peaks and save to database"""
     peaks = [
         Peak(
@@ -84,12 +84,12 @@ def test_peaks(test_session: Session):
     ]
 
     for peak in peaks:
-        test_session.add(peak)
+        test_db.add(peak)
 
-    test_session.commit()
+    test_db.commit()
 
     for peak in peaks:
-        test_session.refresh(peak)
+        test_db.refresh(peak)
 
     return peaks
 

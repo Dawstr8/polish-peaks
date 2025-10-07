@@ -6,14 +6,14 @@ import pytest
 from fastapi import UploadFile
 from starlette.datastructures import Headers
 
-from app.services.upload_service import UploadService
+from src.uploads.service import UploadService
 
 
 @pytest.mark.asyncio
 async def test_save_photo_success(local_storage, mock_upload_file):
     service = UploadService(local_storage)
 
-    path = await service.save_photo(mock_upload_file)
+    path = await service.save_file(mock_upload_file, content_type_prefix="image/")
 
     assert os.path.exists(path)
     assert re.search(r"test_uploads/.+\.jpg$", path)
@@ -29,18 +29,18 @@ async def test_save_photo_validates_content_type(local_storage):
     )
 
     with pytest.raises(ValueError) as exc:
-        await service.save_photo(fake_text)
+        await service.save_file(fake_text, content_type_prefix="image/")
 
-    assert "File must be a photo" in str(exc.value)
+    assert "File must be of type image/" in str(exc.value)
 
 
 @pytest.mark.asyncio
 async def test_delete_photo_success(local_storage, mock_upload_file):
     service = UploadService(local_storage)
-    path = await service.save_photo(mock_upload_file)
+    path = await service.save_file(mock_upload_file, content_type_prefix="image/")
     filename = os.path.basename(path)
 
-    deleted = await service.delete_photo(filename)
+    deleted = await service.delete_file(filename)
 
     assert deleted is True
     assert not os.path.exists(path)
@@ -50,6 +50,6 @@ async def test_delete_photo_success(local_storage, mock_upload_file):
 async def test_delete_photo_failure(local_storage):
     service = UploadService(local_storage)
 
-    deleted = await service.delete_photo("nonexistent.jpg")
+    deleted = await service.delete_file("nonexistent.jpg")
 
     assert deleted is False

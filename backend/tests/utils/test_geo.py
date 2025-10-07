@@ -4,7 +4,7 @@ Tests for the geo.py utility functions
 
 import pytest
 
-from app.utils.geo import dms_to_decimal, haversine_distance
+from src.common.utils.geo import dms_to_decimal, haversine_distance
 
 
 def test_dms_to_decimal():

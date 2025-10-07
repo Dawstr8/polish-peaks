@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from app.services.storage.local_storage import LocalFileStorage
+from src.uploads.services.local_storage import LocalFileStorage
 
 
 @pytest.mark.asyncio
