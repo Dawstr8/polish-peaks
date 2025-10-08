@@ -10,6 +10,7 @@ from src.photos import dependencies
 from src.photos.services.metadata_extractor import MetadataExtractorInterface
 from src.uploads.service import UploadService
 from src.uploads.services.local_storage import LocalFileStorage
+from tests.fixtures.peak_fixtures import peak_coords_dms
 
 
 class MockMetadataExtractor(MetadataExtractorInterface):
@@ -76,15 +77,12 @@ def test_upload_invalid_file_type(client_with_db):
     assert resp.json()["detail"] == "File must be of type image/"
 
 
-def test_upload_with_matching_peak(client_with_db, test_peaks):
+def test_upload_with_matching_peak(client_with_db, test_peaks, peak_coords_dms):
     """Test upload photo with GPS coordinates that match to a nearby peak"""
-
-    near_rysy = ((49, 10, 45.84), (20, 5, 16.8))
-
     metadata = {
         "captured_at": "2025:10:06 14:30:00",
-        "gps_latitude": near_rysy[0],
-        "gps_longitude": near_rysy[1],
+        "gps_latitude": peak_coords_dms["near_rysy"][0],
+        "gps_longitude": peak_coords_dms["near_rysy"][1],
         "gps_altitude": 2450.0,
     }
 
@@ -118,15 +116,13 @@ def test_upload_with_matching_peak(client_with_db, test_peaks):
         app.dependency_overrides.pop(dependencies.get_metadata_extractor, None)
 
 
-def test_upload_with_no_matching_peak(client_with_db, test_peaks):
+def test_upload_with_no_matching_peak(client_with_db, test_peaks, peak_coords_dms):
     """Test upload photo with GPS coordinates that don't match any peak"""
-
-    warsaw = ((52, 13, 46.92), (21, 0, 43.92))
 
     metadata = {
         "captured_at": "2025:10:06 14:30:00",
-        "gps_latitude": warsaw[0],
-        "gps_longitude": warsaw[1],
+        "gps_latitude": peak_coords_dms["warsaw"][0],
+        "gps_longitude": peak_coords_dms["warsaw"][1],
         "gps_altitude": 120.0,
     }
 

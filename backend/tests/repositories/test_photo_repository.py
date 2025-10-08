@@ -8,6 +8,7 @@ import pytest
 
 from src.photos.model import SummitPhoto
 from src.photos.repository import PhotoRepository
+from tests.fixtures.peak_fixtures import peak_coords
 
 
 @pytest.fixture()
@@ -17,18 +18,16 @@ def test_photo_repository(test_db):
 
 
 @pytest.fixture()
-def test_photos(test_db, test_peaks):
+def test_photos(test_db, test_peaks, peak_coords):
     """Create test summit photos and save to database"""
-    near_rysy = (49.1794, 20.0880)
-    near_sniezka = (50.7360, 15.7401)
 
     photos = [
         SummitPhoto(
             file_name="test1.jpg",
             uploaded_at=datetime(2025, 10, 1, 12, 0),
             captured_at=datetime(2025, 9, 30, 10, 0),
-            latitude=near_rysy[0],
-            longitude=near_rysy[1],
+            latitude=peak_coords["near_rysy"][0],
+            longitude=peak_coords["near_rysy"][1],
             altitude=2495,
             peak_id=test_peaks[0].id,
             distance_to_peak=10.5,
@@ -37,8 +36,8 @@ def test_photos(test_db, test_peaks):
             file_name="test2.jpg",
             uploaded_at=datetime(2025, 10, 2, 14, 0),
             captured_at=datetime(2025, 10, 1, 11, 0),
-            latitude=near_sniezka[0],
-            longitude=near_sniezka[1],
+            latitude=peak_coords["near_sniezka"][0],
+            longitude=peak_coords["near_sniezka"][1],
             altitude=1600,
             peak_id=test_peaks[1].id,
             distance_to_peak=5.2,
