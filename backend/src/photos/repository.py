@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlmodel import delete, select
+from sqlmodel import select
 
 from src.database.core import DbSession
 from src.photos.model import SummitPhoto
@@ -46,6 +46,17 @@ class PhotoRepository:
             SummitPhoto if found, None otherwise
         """
         return self.db.get(SummitPhoto, photo_id)
+
+    def get_all(self) -> List[SummitPhoto]:
+        """
+        Get all photos from the database.
+
+        Returns:
+            List of SummitPhoto objects
+        """
+        statement = select(SummitPhoto)
+        results = self.db.exec(statement).all()
+        return results
 
     def delete(self, photo_id: int) -> bool:
         """

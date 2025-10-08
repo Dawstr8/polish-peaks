@@ -35,6 +35,49 @@ def override_upload_service(test_upload_dir):
     app.dependency_overrides.pop(dependencies.get_upload_service, None)
 
 
+def test_get_all_photos_empty(client_with_db):
+    """Test getting all photos when none exist"""
+    resp = client_with_db.get("/api/photos/")
+
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_get_all_photos(client_with_db):
+    """Test getting all photos"""
+
+    def _get_metadata_extractor():
+        return MockMetadataExtractor({})
+
+    app.dependency_overrides[dependencies.get_metadata_extractor] = (
+        _get_metadata_extractor
+    )
+
+    try:
+        client_with_db.post(
+            "/api/photos/",
+            files={"file": ("photo1.jpg", b"imagedata1", "image/jpeg")},
+        )
+
+        client_with_db.post(
+            "/api/photos/",
+            files={"file": ("photo2.jpg", b"imagedata2", "image/jpeg")},
+        )
+
+        resp = client_with_db.get("/api/photos/")
+
+        assert resp.status_code == 200
+        photos = resp.json()
+        assert len(photos) >= 2
+
+        for photo in photos:
+            assert "id" in photo
+            assert "file_name" in photo
+
+    finally:
+        app.dependency_overrides.pop(dependencies.get_metadata_extractor, None)
+
+
 def test_upload_photo_success(client_with_db):
     """Test successful photo upload"""
     metadata = {
@@ -192,6 +235,45 @@ def test_upload_without_gps_data(client_with_db, test_peaks):
 
     finally:
         app.dependency_overrides.pop(dependencies.get_metadata_extractor, None)
+
+
+def test_get_photo_by_id(client_with_db):
+    """Test getting a specific photo by ID"""
+
+    def _get_metadata_extractor():
+        return MockMetadataExtractor({})
+
+    app.dependency_overrides[dependencies.get_metadata_extractor] = (
+        _get_metadata_extractor
+    )
+
+    try:
+        upload_resp = client_with_db.post(
+            "/api/photos/",
+            files={"file": ("specific_photo.jpg", b"specificimagedata", "image/jpeg")},
+        )
+
+        upload_data = upload_resp.json()
+        photo_id = upload_data["id"]
+
+        get_resp = client_with_db.get(f"/api/photos/{photo_id}")
+
+        assert get_resp.status_code == 200
+        photo_data = get_resp.json()
+
+        assert photo_data["id"] == photo_id
+        assert photo_data["file_name"] == upload_data["file_name"]
+
+    finally:
+        app.dependency_overrides.pop(dependencies.get_metadata_extractor, None)
+
+
+def test_get_nonexistent_photo(client_with_db):
+    """Test getting a photo that doesn't exist"""
+    resp = client_with_db.get("/api/photos/9999")
+
+    assert resp.status_code == 404
+    assert resp.json()["detail"] == "Photo not found"
 
 
 def test_delete_photo_success(client_with_db):

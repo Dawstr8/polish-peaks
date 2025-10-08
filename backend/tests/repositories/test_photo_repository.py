@@ -96,6 +96,23 @@ def test_get_by_id_non_existent(test_photo_repository):
     assert non_existent_photo is None
 
 
+def test_get_all(test_photo_repository, test_photos):
+    """Test retrieving all summit photos"""
+    photos = test_photo_repository.get_all()
+
+    assert photos is not None
+    assert len(photos) >= 2
+
+    photo_ids = [photo.id for photo in photos]
+    assert test_photos[0].id in photo_ids
+    assert test_photos[1].id in photo_ids
+
+    first_test_photo = next(photo for photo in photos if photo.id == test_photos[0].id)
+    assert first_test_photo.file_name == "test1.jpg"
+    assert first_test_photo.peak_id == test_photos[0].peak_id
+    assert first_test_photo.distance_to_peak == 10.5
+
+
 def test_delete(test_photo_repository, test_photos):
     """Test deleting a summit photo"""
     photo_id = test_photos[0].id

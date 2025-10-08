@@ -250,6 +250,51 @@ async def test_process_photo_upload_without_metadata(
 
 
 @pytest.mark.asyncio
+async def test_get_photo_by_id(photo_service, mock_photo_repository):
+    """Test getting a photo by ID"""
+    photo_id = 1
+    test_photo = SummitPhoto(
+        id=photo_id,
+        file_name="specific-photo.jpg",
+        latitude=49.1794,
+        longitude=20.0880,
+    )
+    mock_photo_repository.get_by_id.return_value = test_photo
+
+    result = await photo_service.get_photo_by_id(photo_id)
+
+    assert result == test_photo
+    mock_photo_repository.get_by_id.assert_called_once_with(photo_id)
+
+
+@pytest.mark.asyncio
+async def test_get_photo_by_id_not_found(photo_service, mock_photo_repository):
+    """Test getting a photo by ID when it doesn't exist"""
+    photo_id = 999
+    mock_photo_repository.get_by_id.return_value = None
+
+    result = await photo_service.get_photo_by_id(photo_id)
+
+    assert result is None
+    mock_photo_repository.get_by_id.assert_called_once_with(photo_id)
+
+
+@pytest.mark.asyncio
+async def test_get_all_photos(photo_service, mock_photo_repository):
+    """Test getting all photos"""
+    test_photos = [
+        SummitPhoto(id=1, file_name="test1.jpg"),
+        SummitPhoto(id=2, file_name="test2.jpg"),
+    ]
+    mock_photo_repository.get_all.return_value = test_photos
+
+    result = await photo_service.get_all_photos()
+
+    assert result == test_photos
+    mock_photo_repository.get_all.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_delete_photo_success(
     photo_service, mock_upload_service, mock_photo_repository
 ):
