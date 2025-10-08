@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from fastapi import UploadFile
 
@@ -122,6 +122,27 @@ class PhotoService:
             "longitude": longitude,
             "altitude": altitude,
         }
+
+    async def get_photo_by_id(self, photo_id: int) -> Optional[SummitPhoto]:
+        """
+        Get a photo by its ID.
+
+        Args:
+            photo_id: ID of the photo to retrieve
+
+        Returns:
+            SummitPhoto if found, None otherwise
+        """
+        return self._photo_repository.get_by_id(photo_id)
+
+    async def get_all_photos(self) -> List[SummitPhoto]:
+        """
+        Get all photos from the database.
+
+        Returns:
+            List[SummitPhoto]: List of all photos
+        """
+        return self._photo_repository.get_all()
 
     async def delete_photo(self, photo_id: int) -> bool:
         """
