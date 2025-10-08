@@ -16,6 +16,7 @@ from src.photos.repository import PhotoRepository
 from src.photos.service import PhotoService
 from src.photos.services.metadata_extractor import MetadataExtractorInterface
 from src.uploads.service import UploadService
+from tests.fixtures.peak_fixtures import peak_coords, peak_coords_dms
 
 
 @pytest.fixture
@@ -89,13 +90,14 @@ async def test_process_photo_upload_with_matching_peak(
     mock_metadata_extractor,
     mock_peak_service,
     mock_photo_repository,
+    peak_coords,
+    peak_coords_dms,
 ):
     """Test processing a photo upload with matching peak"""
-    near_rysy = [(49, 10, 45.84), (20, 5, 16.8)]
     metadata = {
         "captured_at": "2025:10:06 14:30:00",
-        "gps_latitude": near_rysy[0],
-        "gps_longitude": near_rysy[1],
+        "gps_latitude": peak_coords_dms["near_rysy"][0],
+        "gps_longitude": peak_coords_dms["near_rysy"][1],
         "gps_altitude": 2450.0,
     }
     mock_metadata_extractor.extract.return_value = metadata
@@ -119,8 +121,8 @@ async def test_process_photo_upload_with_matching_peak(
     assert result.distance_to_peak == distance
     assert result.captured_at == datetime(2025, 10, 6, 14, 30, 0)
     assert result.altitude == 2450.0
-    assert result.latitude == dms_to_decimal(near_rysy[0])
-    assert result.longitude == dms_to_decimal(near_rysy[1])
+    assert result.latitude == peak_coords["near_rysy"][0]
+    assert result.longitude == peak_coords["near_rysy"][1]
 
     mock_upload_service.save_file.assert_called_once_with(
         mock_file, content_type_prefix="image/"
@@ -142,13 +144,14 @@ async def test_process_photo_upload_no_matching_peak(
     mock_metadata_extractor,
     mock_peak_service,
     mock_photo_repository,
+    peak_coords,
+    peak_coords_dms,
 ):
     """Test processing a photo upload with no matching peak"""
-    warsaw = [(52, 13, 46.92), (21, 0, 43.92)]
     metadata = {
         "captured_at": "2025:10:06 14:30:00",
-        "gps_latitude": warsaw[0],
-        "gps_longitude": warsaw[1],
+        "gps_latitude": peak_coords_dms["warsaw"][0],
+        "gps_longitude": peak_coords_dms["warsaw"][1],
         "gps_altitude": 120.0,
     }
     mock_metadata_extractor.extract.return_value = metadata
@@ -163,8 +166,8 @@ async def test_process_photo_upload_no_matching_peak(
     assert result.distance_to_peak is None
     assert result.captured_at == datetime(2025, 10, 6, 14, 30, 0)
     assert result.altitude == 120.0
-    assert result.latitude == dms_to_decimal(warsaw[0])
-    assert result.longitude == dms_to_decimal(warsaw[1])
+    assert result.latitude == peak_coords["warsaw"][0]
+    assert result.longitude == peak_coords["warsaw"][1]
 
     mock_upload_service.save_file.assert_called_once_with(
         mock_file, content_type_prefix="image/"
