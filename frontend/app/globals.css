@@ -45,71 +45,97 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Mountain Sky Blue - Light background like clear mountain sky */
+  --background: oklch(0.98 0.01 220);
+  /* Deep Forest Green - Dark text for readability */
+  --foreground: oklch(0.2 0.05 150);
+  /* Snow White - Clean card backgrounds */
+  --card: oklch(0.99 0.005 200);
+  --card-foreground: oklch(0.2 0.05 150);
+  /* Alpine White - Popover backgrounds */
+  --popover: oklch(0.99 0.005 200);
+  --popover-foreground: oklch(0.2 0.05 150);
+  /* Mountain Stone Blue - Primary accent inspired by rocky peaks */
+  --primary: oklch(0.45 0.15 250);
+  --primary-foreground: oklch(0.98 0.01 220);
+  /* Mountain Mist - Secondary colors like morning fog */
+  --secondary: oklch(0.92 0.02 210);
+  --secondary-foreground: oklch(0.25 0.05 150);
+  /* Granite Gray - Muted backgrounds like mountain stone */
+  --muted: oklch(0.94 0.01 200);
+  --muted-foreground: oklch(0.5 0.03 180);
+  /* Pine Needle Green - Accent color inspired by evergreen trees */
+  --accent: oklch(0.88 0.04 160);
+  --accent-foreground: oklch(0.2 0.06 150);
+  /* Alpine Warning Red - For destructive actions */
+  --destructive: oklch(0.6 0.2 25);
+  /* Mountain Ridge - Subtle borders like distant peaks */
+  --border: oklch(0.88 0.02 200);
+  --input: oklch(0.92 0.02 210);
+  /* Slate Blue Ring - Focus rings */
+  --ring: oklch(0.55 0.12 240);
+  /* Mountain Chart Colors - Inspired by natural elements */
+  --chart-1: oklch(0.6 0.18 160); /* Forest Green */
+  --chart-2: oklch(0.65 0.12 200); /* Mountain Blue */
+  --chart-3: oklch(0.45 0.1 250); /* Deep Sky */
+  --chart-4: oklch(0.7 0.15 120); /* Alpine Grass */
+  --chart-5: oklch(0.55 0.08 280); /* Mountain Purple */
+  /* Sidebar - Clean mountain lodge aesthetic */
+  --sidebar: oklch(0.96 0.01 210);
+  --sidebar-foreground: oklch(0.2 0.05 150);
+  --sidebar-primary: oklch(0.45 0.15 250);
+  --sidebar-primary-foreground: oklch(0.98 0.01 220);
+  --sidebar-accent: oklch(0.88 0.04 160);
+  --sidebar-accent-foreground: oklch(0.2 0.06 150);
+  --sidebar-border: oklch(0.88 0.02 200);
+  --sidebar-ring: oklch(0.55 0.12 240);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Night Mountain Sky - Deep dark like nighttime in the mountains */
+  --background: oklch(0.12 0.02 240);
+  /* Snow White - Light text for contrast */
+  --foreground: oklch(0.95 0.01 220);
+  /* Charcoal Rock - Dark cards like mountain stone at night */
+  --card: oklch(0.18 0.03 230);
+  --card-foreground: oklch(0.95 0.01 220);
+  /* Deep Slate - Popover backgrounds */
+  --popover: oklch(0.18 0.03 230);
+  --popover-foreground: oklch(0.95 0.01 220);
+  /* Glacier Blue - Bright primary like moonlit snow */
+  --primary: oklch(0.7 0.15 210);
+  --primary-foreground: oklch(0.12 0.02 240);
+  /* Storm Cloud - Secondary colors */
+  --secondary: oklch(0.25 0.03 220);
+  --secondary-foreground: oklch(0.9 0.01 210);
+  /* Mountain Shadow - Muted backgrounds */
+  --muted: oklch(0.22 0.02 230);
+  --muted-foreground: oklch(0.65 0.02 200);
+  /* Moonlit Pine - Accent like trees in moonlight */
+  --accent: oklch(0.28 0.05 150);
+  --accent-foreground: oklch(0.9 0.01 180);
+  /* Emergency Flare Red - For destructive actions */
+  --destructive: oklch(0.65 0.22 25);
+  /* Ridge Silhouette - Subtle borders */
+  --border: oklch(0.3 0.02 220);
+  --input: oklch(0.25 0.03 220);
+  /* Aurora Ring - Focus rings like northern lights */
+  --ring: oklch(0.6 0.15 200);
+  /* Night Mountain Chart Colors */
+  --chart-1: oklch(0.5 0.15 160); /* Dark Forest */
+  --chart-2: oklch(0.55 0.12 200); /* Night Sky Blue */
+  --chart-3: oklch(0.7 0.15 210); /* Glacier Ice */
+  --chart-4: oklch(0.45 0.1 280); /* Mountain Purple */
+  --chart-5: oklch(0.6 0.18 30); /* Sunset Orange */
+  /* Dark Sidebar - Mountain cabin aesthetic */
+  --sidebar: oklch(0.15 0.02 230);
+  --sidebar-foreground: oklch(0.9 0.01 210);
+  --sidebar-primary: oklch(0.7 0.15 210);
+  --sidebar-primary-foreground: oklch(0.12 0.02 240);
+  --sidebar-accent: oklch(0.28 0.05 150);
+  --sidebar-accent-foreground: oklch(0.9 0.01 180);
+  --sidebar-border: oklch(0.3 0.02 220);
+  --sidebar-ring: oklch(0.6 0.15 200);
 }
 
 @layer base {
