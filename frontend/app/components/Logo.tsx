@@ -15,9 +15,9 @@ export default function Logo() {
         priority
         className="h-7 w-auto mb-1"
       />
-      <h1 className="ml-3 scroll-m-20 text-xl font-semibold tracking-tight text-primary">
+      <span className="ml-3 scroll-m-20 text-xl font-semibold tracking-tight text-primary">
         Polish Peaks
-      </h1>
+      </span>
     </Link>
   );
 }
