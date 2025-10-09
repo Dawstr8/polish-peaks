@@ -6,16 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import Logo from "./Logo";
+import { navigation } from "@/app/config/navigation";
 
 export default function Topbar() {
   const pathname = usePathname();
-
-  const navigation = [
-    { name: "Home", href: "/" },
-    { name: "Gallery", href: "/gallery" },
-    { name: "Peaks", href: "/peaks" },
-    { name: "Upload", href: "/upload" },
-  ];
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
