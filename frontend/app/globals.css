@@ -55,8 +55,8 @@
   /* Alpine White - Popover backgrounds */
   --popover: oklch(0.99 0.005 200);
   --popover-foreground: oklch(0.2 0.05 150);
-  /* Mountain Stone Blue - Primary accent inspired by rocky peaks */
-  --primary: oklch(0.45 0.15 250);
+  /* Forest Peak Green - Primary accent inspired by mountain forests */
+  --primary: oklch(0.45 0.15 160);
   --primary-foreground: oklch(0.98 0.01 220);
   /* Mountain Mist - Secondary colors like morning fog */
   --secondary: oklch(0.92 0.02 210);
@@ -102,8 +102,8 @@
   /* Deep Slate - Popover backgrounds */
   --popover: oklch(0.18 0.03 230);
   --popover-foreground: oklch(0.95 0.01 220);
-  /* Glacier Blue - Bright primary like moonlit snow */
-  --primary: oklch(0.7 0.15 210);
+  /* Moonlit Forest - Bright primary like moonlit pine trees */
+  --primary: oklch(0.65 0.18 160);
   --primary-foreground: oklch(0.12 0.02 240);
   /* Storm Cloud - Secondary colors */
   --secondary: oklch(0.25 0.03 220);
