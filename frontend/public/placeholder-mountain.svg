@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <!-- Clean background -->
+  <rect width="400" height="300" fill="#f9fafb"/>
+  
+  <!-- Simple sun -->
+  <circle cx="320" cy="80" r="25" fill="#fbbf24" />
+  
+  <!-- Three simple triangular peaks exactly like the logo -->
+  <path d="M80,250 L20,250 L50,150 Z" fill="#2D6A4F" />
+  <path d="M200,250 L80,250 L140,100 Z" fill="#1B4332" />
+  <path d="M320,250 L140,250 L230,130 Z" fill="#52B788" />
+</svg>

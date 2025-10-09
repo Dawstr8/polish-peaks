@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Rysy",
+    "title": "Conquered Rysy!",
+    "date": "Oct 6, 2025",
+    "weather": "Sunny",
+    "elevation": "2,499m"
+  },
+  {
+    "id": 2,
+    "name": "Śnieżka",
+    "title": "Amazing view from Śnieżka",
+    "date": "Oct 7, 2025",
+    "weather": "Cloudy",
+    "elevation": "1,603m"
+  },
+  {
+    "id": 3,
+    "name": "Babia Góra",
+    "title": "Sunset at Babia Góra",
+    "date": "Oct 8, 2025",
+    "weather": "Partly Cloudy",
+    "elevation": "1,725m"
+  }
+]

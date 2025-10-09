@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2800 200">
+  <defs>
+    <linearGradient id="mountain-gradient" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Far back mountains -->
+  <path fill="currentColor" opacity="0.1" d="M0,150 Q200,100 400,140 T800,150 T1200,130 T1600,160 T2000,140 T2400,155 T2800,150 L2800,200 L0,200 Z" />
+  
+  <!-- Middle mountains -->
+  <path fill="currentColor" opacity="0.2" d="M0,165 Q150,120 300,150 T600,160 T900,140 T1200,170 T1500,150 T1800,160 T2100,145 T2400,165 T2700,150 L2800,160 L2800,200 L0,200 Z" />
+  
+  <!-- Front mountains -->
+  <path fill="currentColor" opacity="0.3" d="M0,180 Q100,150 200,170 T400,180 T600,160 T800,190 T1000,170 T1200,185 T1400,160 T1600,190 T1800,175 T2000,180 T2200,160 T2400,185 T2600,170 L2800,180 L2800,200 L0,200 Z" />
+  
+  <!-- Gradient overlay for fading effect -->
+  <rect fill="url(#mountain-gradient)" width="2800" height="200" />
+</svg>
