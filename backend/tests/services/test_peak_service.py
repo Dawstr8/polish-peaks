@@ -11,6 +11,57 @@ from src.peaks.service import PeakService
 from tests.fixtures.peak_fixtures import peak_coords, peak_models
 
 
+def test_get_all(peak_models):
+    """Test getting all peaks through the service"""
+    rysy = peak_models["rysy"]
+    giewont = peak_models["giewont"]
+
+    mock_repo = MagicMock(spec=PeakRepository)
+    mock_repo.get_all.return_value = [rysy, giewont]
+
+    service = PeakService(mock_repo)
+
+    peaks = service.get_all()
+
+    assert len(peaks) == 2
+    assert peaks[0].name == "Rysy"
+    assert peaks[1].name == "Giewont"
+
+    mock_repo.get_all.assert_called_once()
+
+
+def test_get_by_id(peak_models):
+    """Test getting a specific peak by ID through the service"""
+    rysy = peak_models["rysy"]
+
+    mock_repo = MagicMock(spec=PeakRepository)
+    mock_repo.get_by_id.return_value = rysy
+
+    service = PeakService(mock_repo)
+
+    peak = service.get_by_id(1)
+
+    assert peak is not None
+    assert peak.id == 1
+    assert peak.name == "Rysy"
+
+    mock_repo.get_by_id.assert_called_once_with(1)
+
+
+def test_get_by_id_not_found():
+    """Test getting a peak by ID when it doesn't exist"""
+    mock_repo = MagicMock(spec=PeakRepository)
+    mock_repo.get_by_id.return_value = None
+
+    service = PeakService(mock_repo)
+
+    peak = service.get_by_id(999)
+
+    assert peak is None
+
+    mock_repo.get_by_id.assert_called_once_with(999)
+
+
 def test_find_nearest_peak(peak_models, peak_coords):
     """Test finding the nearest peak"""
     rysy = peak_models["rysy"]
