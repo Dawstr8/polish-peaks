@@ -2,7 +2,7 @@
 Service for matching geographical coordinates to peaks
 """
 
-from typing import Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from src.common.utils.geo import haversine_distance
 from src.peaks.model import Peak
@@ -23,6 +23,27 @@ class PeakService:
             peak_repository: Repository for accessing peak data
         """
         self.peak_repository = peak_repository
+
+    def get_all(self) -> List[Peak]:
+        """
+        Retrieve all peaks.
+
+        Returns:
+            List of all peaks
+        """
+        return self.peak_repository.get_all()
+
+    def get_by_id(self, peak_id: int) -> Optional[Peak]:
+        """
+        Get a specific peak by ID.
+
+        Args:
+            peak_id: ID of the peak to retrieve
+
+        Returns:
+            Peak if found, None otherwise
+        """
+        return self.peak_repository.get_by_id(peak_id)
 
     def find_nearest_peak(
         self, latitude: float, longitude: float, max_distance_m: float = 5000.0
