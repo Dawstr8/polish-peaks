@@ -16,7 +16,6 @@ from src.photos.repository import PhotoRepository
 from src.photos.service import PhotoService
 from src.photos.services.metadata_extractor import MetadataExtractorInterface
 from src.uploads.service import UploadService
-from tests.fixtures.peak_fixtures import peak_coords, peak_coords_dms
 
 
 @pytest.fixture
@@ -111,7 +110,9 @@ async def test_process_photo_upload_with_matching_peak(
         range="Tatry",
     )
     distance = 15.5
-    mock_peak_service.find_nearest_peak.return_value = (rysy, distance)
+    mock_peak_service.find_nearest_peaks.return_value = [
+        {"peak": rysy, "distance": distance}
+    ]
 
     result = await photo_service.process_photo_upload(mock_file)
 
@@ -128,10 +129,10 @@ async def test_process_photo_upload_with_matching_peak(
         mock_file, content_type_prefix="image/"
     )
     mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
-    mock_peak_service.find_nearest_peak.assert_called_once_with(
+    mock_peak_service.find_nearest_peaks.assert_called_once_with(
         latitude=dms_to_decimal(metadata["gps_latitude"]),
         longitude=dms_to_decimal(metadata["gps_longitude"]),
-        max_distance_m=1000.0,
+        limit=1,
     )
     mock_photo_repository.save.assert_called_once()
 
@@ -156,7 +157,7 @@ async def test_process_photo_upload_no_matching_peak(
     }
     mock_metadata_extractor.extract.return_value = metadata
 
-    mock_peak_service.find_nearest_peak.return_value = (None, None)
+    mock_peak_service.find_nearest_peaks.return_value = []
 
     result = await photo_service.process_photo_upload(mock_file)
 
@@ -173,7 +174,7 @@ async def test_process_photo_upload_no_matching_peak(
         mock_file, content_type_prefix="image/"
     )
     mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
-    mock_peak_service.find_nearest_peak.assert_called_once()
+    mock_peak_service.find_nearest_peaks.assert_called_once()
     mock_photo_repository.save.assert_called_once()
 
 
@@ -208,7 +209,7 @@ async def test_process_photo_upload_without_gps_data(
         mock_file, content_type_prefix="image/"
     )
     mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
-    mock_peak_service.find_nearest_peak.assert_not_called()
+    mock_peak_service.find_nearest_peaks.assert_not_called()
     mock_photo_repository.save.assert_called_once()
 
 
@@ -245,7 +246,7 @@ async def test_process_photo_upload_without_metadata(
         mock_file, content_type_prefix="image/"
     )
     mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
-    mock_peak_service.find_nearest_peak.assert_not_called()
+    mock_peak_service.find_nearest_peaks.assert_not_called()
     mock_photo_repository.save.assert_called_once()
 
 

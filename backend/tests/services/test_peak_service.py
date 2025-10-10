@@ -8,7 +8,6 @@ import pytest
 
 from src.peaks.repository import PeakRepository
 from src.peaks.service import PeakService
-from tests.fixtures.peak_fixtures import peak_coords, peak_models
 
 
 def test_get_all(peak_models):
@@ -62,8 +61,8 @@ def test_get_by_id_not_found():
     mock_repo.get_by_id.assert_called_once_with(999)
 
 
-def test_find_nearest_peak(peak_models, peak_coords):
-    """Test finding the nearest peak"""
+def test_find_nearest_peaks(peak_models, peak_coords):
+    """Test finding the nearest peaks"""
     rysy = peak_models["rysy"]
     giewont = peak_models["giewont"]
 
@@ -72,54 +71,57 @@ def test_find_nearest_peak(peak_models, peak_coords):
 
     service = PeakService(mock_repo)
 
-    peak, distance = service.find_nearest_peak(
+    results = service.find_nearest_peaks(
         latitude=peak_coords["near_rysy"][0],
         longitude=peak_coords["near_rysy"][1],
-        max_distance_m=5000.0,
+        limit=5,
     )
 
-    assert peak.id == 1
-    assert peak.name == "Rysy"
-    assert distance < 100
+    assert len(results) == 2
+    assert results[0]["peak"].id == 1
+    assert results[0]["peak"].name == "Rysy"
+    assert results[0]["distance"] < 100
+    assert results[1]["peak"].name == "Giewont"
 
     mock_repo.get_all.assert_called_once()
 
 
 def test_find_nearest_peak_no_peaks(peak_coords):
-    """Test finding the nearest peak when no peaks exist"""
+    """Test finding the nearest peaks when no peaks exist"""
     mock_repo = MagicMock(spec=PeakRepository)
     mock_repo.get_all.return_value = []
 
     service = PeakService(mock_repo)
 
-    peak, distance = service.find_nearest_peak(
+    results = service.find_nearest_peaks(
         latitude=peak_coords["near_rysy"][0],
         longitude=peak_coords["near_rysy"][1],
-        max_distance_m=5000.0,
+        limit=5,
     )
 
-    assert peak is None
-    assert distance is None
+    assert results == []
 
     mock_repo.get_all.assert_called_once()
 
 
-def test_find_nearest_peak_none_in_range(peak_models, peak_coords):
-    """Test finding the nearest peak when none are within range"""
+def test_find_nearest_peaks_respects_limit(peak_models, peak_coords):
+    """Test that the limit parameter correctly limits the number of results"""
+    rysy = peak_models["rysy"]
+    giewont = peak_models["giewont"]
     babia_gora = peak_models["babia_gora"]
 
     mock_repo = MagicMock(spec=PeakRepository)
-    mock_repo.get_all.return_value = [babia_gora]
+    mock_repo.get_all.return_value = [rysy, giewont, babia_gora]
 
     service = PeakService(mock_repo)
 
-    peak, distance = service.find_nearest_peak(
-        latitude=peak_coords["warsaw"][0],
-        longitude=peak_coords["warsaw"][1],
-        max_distance_m=5000.0,
+    results = service.find_nearest_peaks(
+        latitude=peak_coords["near_rysy"][0],
+        longitude=peak_coords["near_rysy"][1],
+        limit=2,
     )
 
-    assert peak is None
-    assert distance is None
+    assert len(results) == 2
+    assert results[0]["distance"] < results[1]["distance"]
 
     mock_repo.get_all.assert_called_once()

@@ -2,7 +2,7 @@
 Service for matching geographical coordinates to peaks
 """
 
-from typing import List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 
 from src.common.utils.geo import haversine_distance
 from src.peaks.model import Peak
@@ -45,49 +45,35 @@ class PeakService:
         """
         return self.peak_repository.get_by_id(peak_id)
 
-    def find_nearest_peak(
-        self, latitude: float, longitude: float, max_distance_m: float = 5000.0
-    ) -> Union[Tuple[Peak, float], Tuple[None, None]]:
+    def find_nearest_peaks(
+        self, latitude: float, longitude: float, limit: int = 5
+    ) -> List[Dict[str, Any]]:
         """
-        Find the nearest peak to the given coordinates.
+        Find the nearest peaks to a given latitude and longitude using Haversine distance.
 
         Args:
             latitude: Latitude of the point
             longitude: Longitude of the point
-            max_distance_m: Maximum distance in meters to search for peaks
+            limit: Maximum number of peaks to return (default: 5)
 
         Returns:
-            Union[Tuple[Peak, float], Tuple[None, None]]: The nearest peak and its distance in meters,
-            or Tuple[None, None] if no peak is within the max distance
+            List of dictionaries containing peak and its distance from the point
         """
         peaks = self.peak_repository.get_all()
 
         if not peaks:
-            return self._empty()
+            return []
 
-        peak_distances = [
-            (
-                peak,
-                haversine_distance(latitude, longitude, peak.latitude, peak.longitude),
-            )
+        peaks_with_distance = [
+            {
+                "peak": peak,
+                "distance": haversine_distance(
+                    latitude, longitude, peak.latitude, peak.longitude
+                ),
+            }
             for peak in peaks
         ]
 
-        nearby_peaks = [
-            (peak, distance)
-            for peak, distance in peak_distances
-            if distance <= max_distance_m
-        ]
+        peaks_by_nearest = sorted(peaks_with_distance, key=lambda x: x["distance"])
 
-        if not nearby_peaks:
-            return self._empty()
-
-        return min(nearby_peaks, key=lambda x: x[1])
-
-    def _empty(self) -> Tuple[None, None]:
-        """Return an empty result tuple when no peaks are found.
-
-        Returns:
-            Tuple[None, None]: A tuple with two None values
-        """
-        return (None, None)
+        return peaks_by_nearest[:limit]

@@ -8,7 +8,6 @@ import pytest
 
 from src.photos.model import SummitPhoto
 from src.photos.repository import PhotoRepository
-from tests.fixtures.peak_fixtures import peak_coords
 
 
 @pytest.fixture()

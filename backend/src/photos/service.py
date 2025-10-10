@@ -59,15 +59,18 @@ class PhotoService:
             time_and_location.get("captured_at"),
         )
 
-        peak, distance = (
-            self._peak_service.find_nearest_peak(
+        peak, distance = None, None
+        if latitude and longitude:
+            peaks_with_distance = self._peak_service.find_nearest_peaks(
                 latitude=latitude,
                 longitude=longitude,
-                max_distance_m=1000.0,
+                limit=1,
             )
-            if latitude and longitude
-            else (None, None)
-        )
+
+            if peaks_with_distance:
+                nearest = peaks_with_distance[0]
+                if nearest["distance"] <= 1000.0:
+                    peak, distance = nearest["peak"], nearest["distance"]
 
         photo = SummitPhoto(
             file_name=path.split("/")[-1],

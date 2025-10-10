@@ -10,7 +10,6 @@ from src.photos import dependencies
 from src.photos.services.metadata_extractor import MetadataExtractorInterface
 from src.uploads.service import UploadService
 from src.uploads.services.local_storage import LocalFileStorage
-from tests.fixtures.peak_fixtures import peak_coords_dms
 
 
 class MockMetadataExtractor(MetadataExtractorInterface):
