@@ -1,16 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@/src/components/ui/card";
+import { Badge } from "@/src/components/ui/badge";
 import { Camera, MapPin, Cloud, Calendar, Mountain } from "lucide-react";
-import peaksData from "@/app/data/sample-summit-photos.json";
+import peaksData from "@/src/data/sample-summit-photos.json";
 
 export default function Home() {
   const peaks = peaksData;

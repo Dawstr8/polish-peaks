@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/src/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
 import { Menu } from "lucide-react";
 import Logo from "./Logo";
-import { navigation } from "@/app/config/navigation";
+import { navigation } from "@/src/config/navigation";
 
 export default function Topbar() {
   const pathname = usePathname();
