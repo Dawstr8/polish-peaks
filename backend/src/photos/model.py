@@ -1,12 +1,13 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlmodel import Field, Relationship, SQLModel
-
-from src.peaks.model import Peak
+from pydantic import BaseModel
+from sqlmodel import Field, SQLModel
 
 
 class SummitPhoto(SQLModel, table=True):
+    """Database model for a summit photo with metadata"""
+
     id: Optional[int] = Field(default=None, primary_key=True)
     file_name: str
     uploaded_at: datetime = Field(default_factory=datetime.utcnow)
@@ -15,4 +16,15 @@ class SummitPhoto(SQLModel, table=True):
     longitude: Optional[float] = None
     altitude: Optional[float] = None
     peak_id: Optional[int] = Field(default=None, foreign_key="peak.id")
+    distance_to_peak: Optional[float] = None
+
+
+class SummitPhotoCreate(BaseModel):
+    """Request model for creating a new photo with metadata"""
+
+    captured_at: Optional[datetime] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    altitude: Optional[float] = None
+    peak_id: Optional[int] = None
     distance_to_peak: Optional[float] = None

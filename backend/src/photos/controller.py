@@ -1,9 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from src.photos.dependencies import PhotoServiceDep
-from src.photos.model import SummitPhoto
+from src.photos.model import SummitPhoto, SummitPhotoCreate
 
 router = APIRouter(prefix="/api/photos", tags=["photos"])
 
@@ -30,15 +30,22 @@ async def get_all_photos(
 async def upload_photo(
     photo_service: PhotoServiceDep,
     file: UploadFile = File(...),
+    summit_photo_create: str = Form(...),
 ):
     """
-    Upload a photo file and find matching peaks
+    Upload a photo file with metadata
+
+    Args:
+        file: The photo file to upload
+        summit_photo_create: Metadata for the photo (captured_at, latitude, longitude, altitude, peak_id, distance_to_peak)
 
     Returns:
-        SummitPhoto: The uploaded photo object with related peak ID
+        SummitPhoto: The uploaded photo object
     """
+    summit_photo_create = SummitPhotoCreate.model_validate_json(summit_photo_create)
+
     try:
-        return await photo_service.process_photo_upload(file)
+        return await photo_service.upload_photo(file, summit_photo_create)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
