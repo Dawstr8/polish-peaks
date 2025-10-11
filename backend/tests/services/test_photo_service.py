@@ -8,13 +8,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import UploadFile
 
-from src.common.utils.geo import dms_to_decimal
-from src.peaks.model import Peak
 from src.peaks.service import PeakService
-from src.photos.model import SummitPhoto
+from src.photos.model import SummitPhoto, SummitPhotoCreate
 from src.photos.repository import PhotoRepository
 from src.photos.service import PhotoService
-from src.photos.services.metadata_extractor import MetadataExtractorInterface
 from src.uploads.service import UploadService
 
 
@@ -25,13 +22,6 @@ def mock_upload_service():
     service.save_file.return_value = "/uploads/test-photo.jpg"
     service.delete_file.return_value = True
     return service
-
-
-@pytest.fixture
-def mock_metadata_extractor():
-    """Create a mock metadata extractor"""
-    extractor = MagicMock(spec=MetadataExtractorInterface)
-    return extractor
 
 
 @pytest.fixture
@@ -59,14 +49,12 @@ def mock_photo_repository():
 @pytest.fixture
 def photo_service(
     mock_upload_service,
-    mock_metadata_extractor,
     mock_peak_service,
     mock_photo_repository,
 ):
     """Create a PhotoService with mocked dependencies"""
     return PhotoService(
         mock_upload_service,
-        mock_metadata_extractor,
         mock_peak_service,
         mock_photo_repository,
     )
@@ -82,44 +70,28 @@ def mock_file():
 
 
 @pytest.mark.asyncio
-async def test_process_photo_upload_with_matching_peak(
+async def test_upload_photo_with_metadata(
     photo_service,
     mock_file,
     mock_upload_service,
-    mock_metadata_extractor,
-    mock_peak_service,
     mock_photo_repository,
     peak_coords,
-    peak_coords_dms,
 ):
-    """Test processing a photo upload with matching peak"""
-    metadata = {
-        "captured_at": "2025:10:06 14:30:00",
-        "gps_latitude": peak_coords_dms["near_rysy"][0],
-        "gps_longitude": peak_coords_dms["near_rysy"][1],
-        "gps_altitude": 2450.0,
-    }
-    mock_metadata_extractor.extract.return_value = metadata
-
-    rysy = Peak(
-        id=1,
-        name="Rysy",
-        elevation=2499,
-        latitude=49.1795,
-        longitude=20.0881,
-        range="Tatry",
+    """Test uploading a photo with provided metadata"""
+    summit_photo_create = SummitPhotoCreate(
+        captured_at=datetime(2025, 10, 6, 14, 30, 0),
+        latitude=peak_coords["near_rysy"][0],
+        longitude=peak_coords["near_rysy"][1],
+        altitude=2450.0,
+        peak_id=1,
     )
-    distance = 15.5
-    mock_peak_service.find_nearest_peaks.return_value = [
-        {"peak": rysy, "distance": distance}
-    ]
 
-    result = await photo_service.process_photo_upload(mock_file)
+    result = await photo_service.upload_photo(mock_file, summit_photo_create)
 
     assert result.id == 1
     assert result.file_name == "test-photo.jpg"
     assert result.peak_id == 1
-    assert result.distance_to_peak == distance
+    assert result.distance_to_peak is None
     assert result.captured_at == datetime(2025, 10, 6, 14, 30, 0)
     assert result.altitude == 2450.0
     assert result.latitude == peak_coords["near_rysy"][0]
@@ -128,110 +100,20 @@ async def test_process_photo_upload_with_matching_peak(
     mock_upload_service.save_file.assert_called_once_with(
         mock_file, content_type_prefix="image/"
     )
-    mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
-    mock_peak_service.find_nearest_peaks.assert_called_once_with(
-        latitude=dms_to_decimal(metadata["gps_latitude"]),
-        longitude=dms_to_decimal(metadata["gps_longitude"]),
-        limit=1,
-    )
     mock_photo_repository.save.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_process_photo_upload_no_matching_peak(
+async def test_upload_photo_without_metadata(
     photo_service,
     mock_file,
     mock_upload_service,
-    mock_metadata_extractor,
-    mock_peak_service,
-    mock_photo_repository,
-    peak_coords,
-    peak_coords_dms,
-):
-    """Test processing a photo upload with no matching peak"""
-    metadata = {
-        "captured_at": "2025:10:06 14:30:00",
-        "gps_latitude": peak_coords_dms["warsaw"][0],
-        "gps_longitude": peak_coords_dms["warsaw"][1],
-        "gps_altitude": 120.0,
-    }
-    mock_metadata_extractor.extract.return_value = metadata
-
-    mock_peak_service.find_nearest_peaks.return_value = []
-
-    result = await photo_service.process_photo_upload(mock_file)
-
-    assert result.id == 1
-    assert result.file_name == "test-photo.jpg"
-    assert result.peak_id is None
-    assert result.distance_to_peak is None
-    assert result.captured_at == datetime(2025, 10, 6, 14, 30, 0)
-    assert result.altitude == 120.0
-    assert result.latitude == peak_coords["warsaw"][0]
-    assert result.longitude == peak_coords["warsaw"][1]
-
-    mock_upload_service.save_file.assert_called_once_with(
-        mock_file, content_type_prefix="image/"
-    )
-    mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
-    mock_peak_service.find_nearest_peaks.assert_called_once()
-    mock_photo_repository.save.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_process_photo_upload_without_gps_data(
-    photo_service,
-    mock_file,
-    mock_upload_service,
-    mock_metadata_extractor,
-    mock_peak_service,
     mock_photo_repository,
 ):
-    """Test processing a photo upload without GPS data"""
-    metadata = {
-        "captured_at": "2025:10:06 16:45:20",
-        "gps_altitude": None,
-    }
-    mock_metadata_extractor.extract.return_value = metadata
+    """Test uploading a photo without any metadata"""
+    summit_photo_create = SummitPhotoCreate()
 
-    result = await photo_service.process_photo_upload(mock_file)
-
-    assert result.id == 1
-    assert result.file_name == "test-photo.jpg"
-    assert result.peak_id is None
-    assert result.distance_to_peak is None
-    assert result.captured_at == datetime(2025, 10, 6, 16, 45, 20)
-    assert result.altitude is None
-    assert result.latitude is None
-    assert result.longitude is None
-
-    mock_upload_service.save_file.assert_called_once_with(
-        mock_file, content_type_prefix="image/"
-    )
-    mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
-    mock_peak_service.find_nearest_peaks.assert_not_called()
-    mock_photo_repository.save.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_process_photo_upload_without_metadata(
-    photo_service,
-    mock_file,
-    mock_upload_service,
-    mock_metadata_extractor,
-    mock_peak_service,
-    mock_photo_repository,
-):
-    """Test processing a photo upload without metadata"""
-    metadata = {
-        "captured_at": None,
-        "gps_latitude": None,
-        "gps_longitude": None,
-        "gps_altitude": None,
-    }
-    mock_metadata_extractor.extract.return_value = metadata
-
-    result = await photo_service.process_photo_upload(mock_file)
+    result = await photo_service.upload_photo(mock_file, summit_photo_create)
 
     assert result.id == 1
     assert result.file_name == "test-photo.jpg"
@@ -245,8 +127,36 @@ async def test_process_photo_upload_without_metadata(
     mock_upload_service.save_file.assert_called_once_with(
         mock_file, content_type_prefix="image/"
     )
-    mock_metadata_extractor.extract.assert_called_once_with("/uploads/test-photo.jpg")
-    mock_peak_service.find_nearest_peaks.assert_not_called()
+    mock_photo_repository.save.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_upload_photo_with_partial_metadata(
+    photo_service,
+    mock_file,
+    mock_upload_service,
+    mock_photo_repository,
+):
+    """Test uploading a photo with only some metadata fields"""
+    summit_photo_create = SummitPhotoCreate(
+        captured_at=datetime(2025, 10, 6, 16, 45, 20),
+        altitude=1500.0,
+    )
+
+    result = await photo_service.upload_photo(mock_file, summit_photo_create)
+
+    assert result.id == 1
+    assert result.file_name == "test-photo.jpg"
+    assert result.peak_id is None
+    assert result.distance_to_peak is None
+    assert result.captured_at == datetime(2025, 10, 6, 16, 45, 20)
+    assert result.altitude == 1500.0
+    assert result.latitude is None
+    assert result.longitude is None
+
+    mock_upload_service.save_file.assert_called_once_with(
+        mock_file, content_type_prefix="image/"
+    )
     mock_photo_repository.save.assert_called_once()
 
 

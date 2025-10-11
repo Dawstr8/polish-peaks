@@ -12,7 +12,7 @@ from main import app
 from src.database.core import get_db
 from src.peaks.model import Peak
 from src.uploads.services.local_storage import LocalFileStorage
-from tests.fixtures.peak_fixtures import peak_coords, peak_coords_dms, peak_models
+from tests.fixtures.peak_fixtures import peak_coords, peak_models
 
 
 @pytest.fixture
