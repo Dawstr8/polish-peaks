@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Mountain, Github, Mail } from "lucide-react";
 import Logo from "./Logo";
-import { navigation } from "@/src/config/navigation";
+import { navigation } from "@/config/navigation";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();

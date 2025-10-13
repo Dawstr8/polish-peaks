@@ -1,10 +1,10 @@
 "use client";
 
-import { PhotoClient } from "@/src/lib/photos/client";
+import { PhotoClient } from "@/lib/photos/client";
 import { useMutation } from "@tanstack/react-query";
-import { Spinner } from "@/src/components/ui/spinner";
-import { PhotoPreview } from "@/src/app/upload/components/PhotoPreview";
-import { Button } from "@/src/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { PhotoPreview } from "@/app/upload/components/PhotoPreview";
+import { Button } from "@/components/ui/button";
 import { UploadSuccess } from "./UploadSuccess";
 
 interface UploadStepProps {
