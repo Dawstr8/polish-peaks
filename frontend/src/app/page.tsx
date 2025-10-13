@@ -40,7 +40,7 @@ export default function Home() {
   ];
 
   return (
-    <main className="flex-grow">
+    <>
       {/* Hero Section */}
       <section className="relative text-primary-foreground bg-gradient-to-b from-primary to-[var(--hero-gradient-to)]">
         <div className="absolute inset-0 overflow-hidden opacity-50">
@@ -181,6 +181,6 @@ export default function Home() {
           </Button>
         </div>
       </section>
-    </main>
+    </>
   );
 }
