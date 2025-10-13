@@ -2,8 +2,8 @@
  * API client for interacting with the photo endpoints
  */
 
-import { SummitPhoto } from "@/src/lib/photos/model";
-import { API_ENDPOINTS } from "@/src/config/api";
+import { SummitPhoto } from "@/lib/photos/model";
+import { API_ENDPOINTS } from "@/config/api";
 import { ApiClient } from "../common/api-client";
 
 /**
