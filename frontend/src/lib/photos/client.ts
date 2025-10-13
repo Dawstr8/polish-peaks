@@ -2,9 +2,9 @@
  * API client for interacting with the photo endpoints
  */
 
-import { SummitPhoto } from "@/lib/photos/model";
+import { SummitPhoto, SummitPhotoCreate } from "@/lib/photos/types";
 import { API_ENDPOINTS } from "@/config/api";
-import { ApiClient } from "../common/api-client";
+import { ApiClient } from "@/lib/common/api-client";
 
 /**
  * PhotoClient class for handling photo-related API requests
@@ -16,10 +16,16 @@ export class PhotoClient extends ApiClient {
    * @returns The uploaded photo data
    * @throws Error if the upload fails
    */
-  static async uploadPhoto(file: File): Promise<SummitPhoto> {
+  static async uploadPhoto(
+    file: File,
+    summitPhotoCreate: SummitPhotoCreate | null,
+  ): Promise<SummitPhoto> {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("summit_photo_create", "{}");
+    formData.append(
+      "summit_photo_create",
+      summitPhotoCreate ? JSON.stringify(summitPhotoCreate) : "",
+    );
 
     return this.post<SummitPhoto>(API_ENDPOINTS.photos.post, formData);
   }

@@ -6,15 +6,23 @@ import { Spinner } from "@/components/ui/spinner";
 import { PhotoPreview } from "@/app/upload/components/PhotoPreview";
 import { Button } from "@/components/ui/button";
 import { UploadSuccess } from "./UploadSuccess";
+import { SummitPhotoCreate } from "@/lib/photos/types";
 
 interface UploadStepProps {
-  file: File;
-  removeFile: () => void;
+  file: File | null;
+  summitPhotoCreate: SummitPhotoCreate | null;
+  back: () => void;
 }
 
-export function UploadStep({ file, removeFile }: UploadStepProps) {
+export function UploadStep({ file, summitPhotoCreate, back }: UploadStepProps) {
   const mutation = useMutation({
-    mutationFn: (file: File) => PhotoClient.uploadPhoto(file),
+    mutationFn: ({
+      file,
+      summitPhotoCreate,
+    }: {
+      file: File;
+      summitPhotoCreate: SummitPhotoCreate | null;
+    }) => PhotoClient.uploadPhoto(file, summitPhotoCreate),
   });
 
   return (
@@ -26,21 +34,25 @@ export function UploadStep({ file, removeFile }: UploadStepProps) {
         </div>
       )}
       {!mutation.isSuccess && (
-        <div className="flex flex-col gap-4 items-center justify-center">
-          <PhotoPreview file={file} />
-          <div className="flex gap-2">
+        <>
+          <div className="flex items-center justify-center">
+            <PhotoPreview file={file} />
+          </div>
+          <div className="flex justify-center gap-4">
+            <Button variant="outline" onClick={back}>
+              Back
+            </Button>
             <Button
-              onClick={() => mutation.mutate(file)}
+              onClick={() =>
+                file && mutation.mutate({ file, summitPhotoCreate })
+              }
               disabled={mutation.isPending}
             >
               {mutation.isPending && <Spinner />}
               {mutation.isPending ? "Uploading..." : "Upload Photo"}
             </Button>
-            <Button variant="outline" onClick={removeFile}>
-              Remove
-            </Button>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
