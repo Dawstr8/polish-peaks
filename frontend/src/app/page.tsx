@@ -12,33 +12,33 @@ import { Badge } from "@/src/components/ui/badge";
 import { Camera, MapPin, Cloud, Calendar, Mountain } from "lucide-react";
 import peaksData from "@/src/data/sample-summit-photos.json";
 
+const peaks = peaksData;
+
+const features = [
+  {
+    id: 1,
+    icon: Camera,
+    title: "Upload Photos",
+    description:
+      "Upload photos from your mountain adventures. Our system automatically reads location and time data.",
+  },
+  {
+    id: 2,
+    icon: MapPin,
+    title: "Auto Peak Detection",
+    description:
+      "Our system automatically matches your location to Polish mountain peaks and suggests the correct summit.",
+  },
+  {
+    id: 3,
+    icon: Cloud,
+    title: "Weather History",
+    description:
+      "See the weather conditions from the day of your climb, making your memories more complete and informative.",
+  },
+];
+
 export default function Home() {
-  const peaks = peaksData;
-
-  const features = [
-    {
-      id: 1,
-      icon: Camera,
-      title: "Upload Photos",
-      description:
-        "Upload photos from your mountain adventures. Our system automatically reads location and time data.",
-    },
-    {
-      id: 2,
-      icon: MapPin,
-      title: "Auto Peak Detection",
-      description:
-        "Our system automatically matches your location to Polish mountain peaks and suggests the correct summit.",
-    },
-    {
-      id: 3,
-      icon: Cloud,
-      title: "Weather History",
-      description:
-        "See the weather conditions from the day of your climb, making your memories more complete and informative.",
-    },
-  ];
-
   return (
     <>
       {/* Hero Section */}
