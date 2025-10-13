@@ -2,12 +2,13 @@
  * API client for interacting with the photo endpoints
  */
 
-import { SummitPhoto } from "@/src/models/summit-photo";
+import { SummitPhoto } from "@/src/lib/photos/model";
 import { API_ENDPOINTS } from "@/src/config/api";
-import { ApiClient } from "./api-client";
+import { ApiClient } from "../common/api-client";
 
 /**
- * PhotoClient class for handling photo-related API requests */
+ * PhotoClient class for handling photo-related API requests
+ */
 export class PhotoClient extends ApiClient {
   /**
    * Upload a photo file to the backend

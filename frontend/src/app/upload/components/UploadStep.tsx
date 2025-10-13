@@ -1,6 +1,6 @@
 "use client";
 
-import { PhotoClient } from "@/src/lib/clients/photo-client";
+import { PhotoClient } from "@/src/lib/photos/client";
 import { useMutation } from "@tanstack/react-query";
 import { Spinner } from "@/src/components/ui/spinner";
 import { PhotoPreview } from "@/src/app/upload/components/PhotoPreview";
