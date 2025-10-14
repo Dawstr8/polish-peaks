@@ -3,9 +3,9 @@
 import { PhotoClient } from "@/lib/photos/client";
 import { useMutation } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
-import { PhotoPreview } from "@/app/upload/components/PhotoPreview";
+import { PhotoPreview } from "@/components/upload/PhotoPreview";
 import { Button } from "@/components/ui/button";
-import { UploadSuccess } from "./UploadSuccess";
+import { UploadSuccess } from "@/components/upload/UploadSuccess";
 import { SummitPhotoCreate } from "@/lib/photos/types";
 
 interface UploadStepProps {
