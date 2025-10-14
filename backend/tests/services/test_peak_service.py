@@ -125,3 +125,50 @@ def test_find_nearest_peaks_respects_limit(peak_models, peak_coords):
     assert results[0]["distance"] < results[1]["distance"]
 
     mock_repo.get_all.assert_called_once()
+
+
+def test_find_nearest_peaks_with_max_distance(peak_models, peak_coords):
+    """Test that max_distance parameter filters peaks correctly"""
+    rysy = peak_models["rysy"]
+    giewont = peak_models["giewont"]
+    babia_gora = peak_models["babia_gora"]
+
+    mock_repo = MagicMock(spec=PeakRepository)
+    mock_repo.get_all.return_value = [rysy, giewont, babia_gora]
+
+    service = PeakService(mock_repo)
+
+    results = service.find_nearest_peaks(
+        latitude=peak_coords["near_rysy"][0],
+        longitude=peak_coords["near_rysy"][1],
+        max_distance=100,
+    )
+
+    assert len(results) == 1
+    assert results[0]["peak"].name == "Rysy"
+    assert results[0]["distance"] < 100
+
+    mock_repo.get_all.assert_called()
+
+
+def test_find_nearest_peaks_max_distance_none(peak_models, peak_coords):
+    """Test that max_distance=None includes all peaks"""
+    rysy = peak_models["rysy"]
+    giewont = peak_models["giewont"]
+
+    mock_repo = MagicMock(spec=PeakRepository)
+    mock_repo.get_all.return_value = [rysy, giewont]
+
+    service = PeakService(mock_repo)
+
+    results = service.find_nearest_peaks(
+        latitude=peak_coords["near_rysy"][0],
+        longitude=peak_coords["near_rysy"][1],
+        max_distance=None,
+    )
+
+    assert len(results) == 2
+    assert results[0]["peak"].name == "Rysy"
+    assert results[1]["peak"].name == "Giewont"
+
+    mock_repo.get_all.assert_called_once()

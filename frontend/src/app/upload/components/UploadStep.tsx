@@ -15,7 +15,7 @@ interface UploadStepProps {
 }
 
 export function UploadStep({ file, summitPhotoCreate, back }: UploadStepProps) {
-  const mutation = useMutation({
+  const { isPending, isSuccess, isError, error, mutate } = useMutation({
     mutationFn: ({
       file,
       summitPhotoCreate,
@@ -27,13 +27,13 @@ export function UploadStep({ file, summitPhotoCreate, back }: UploadStepProps) {
 
   return (
     <div className="space-y-6">
-      {mutation.isSuccess && <UploadSuccess />}
-      {mutation.isError && (
+      {isSuccess && <UploadSuccess />}
+      {isError && (
         <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg">
-          {mutation.error.message}
+          {error.message}
         </div>
       )}
-      {!mutation.isSuccess && (
+      {!isSuccess && (
         <>
           <div className="flex items-center justify-center">
             <PhotoPreview file={file} />
@@ -43,13 +43,11 @@ export function UploadStep({ file, summitPhotoCreate, back }: UploadStepProps) {
               Back
             </Button>
             <Button
-              onClick={() =>
-                file && mutation.mutate({ file, summitPhotoCreate })
-              }
-              disabled={mutation.isPending}
+              onClick={() => file && mutate({ file, summitPhotoCreate })}
+              disabled={isPending}
             >
-              {mutation.isPending && <Spinner />}
-              {mutation.isPending ? "Uploading..." : "Upload Photo"}
+              {isPending && <Spinner />}
+              {isPending ? "Uploading..." : "Upload Photo"}
             </Button>
           </div>
         </>

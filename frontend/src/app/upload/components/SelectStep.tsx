@@ -17,7 +17,7 @@ interface SelectStepProps {
 }
 
 export function SelectStep({ setFile, setMetadata, next }: SelectStepProps) {
-  const mutation = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: (file: File) => photoMetadataService.extractMetadata(file),
     onSuccess: (metadata) => {
       setMetadata(metadata);
@@ -33,11 +33,11 @@ export function SelectStep({ setFile, setMetadata, next }: SelectStepProps) {
       const file = acceptedFiles[0];
       if (!file) return;
 
-      mutation.mutate(file);
+      mutate(file);
     },
     accept: { "image/*": [] },
     multiple: false,
-    disabled: mutation.isPending,
+    disabled: isPending,
   });
 
   return (
@@ -46,13 +46,13 @@ export function SelectStep({ setFile, setMetadata, next }: SelectStepProps) {
       className={cn(
         "border-2 border-dashed rounded-lg p-12 flex flex-col items-center justify-center cursor-pointer transition-colors",
         isDragActive ? "border-primary bg-primary/10" : "border-border",
-        mutation.isPending && "opacity-50 cursor-not-allowed",
+        isPending && "opacity-50 cursor-not-allowed",
       )}
     >
       <MessageBlock
         iconComponent={Upload}
         title={
-          mutation.isPending
+          isPending
             ? "Extracting metadata..."
             : "Drag and drop or click to upload"
         }
@@ -60,9 +60,9 @@ export function SelectStep({ setFile, setMetadata, next }: SelectStepProps) {
         className="mb-4"
       />
 
-      <Button disabled={mutation.isPending}>
-        {mutation.isPending && <Spinner />}
-        {mutation.isPending ? "Processing..." : "Select File"}
+      <Button disabled={isPending}>
+        {isPending && <Spinner />}
+        {isPending ? "Processing..." : "Select File"}
       </Button>
       <input {...getInputProps()} />
     </div>

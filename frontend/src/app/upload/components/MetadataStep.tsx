@@ -14,7 +14,6 @@ const LocationMap = dynamic(
 );
 
 interface MetadataStepProps {
-  file: File | null;
   metadata: PhotoMetadata;
   setSummitPhotoCreate: (summitPhotoCreate: SummitPhotoCreate) => void;
   back: () => void;

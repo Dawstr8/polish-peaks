@@ -9,13 +9,14 @@ import { useStepper } from "@/hooks/use-stepper";
 import { MetadataStep } from "./components/MetadataStep";
 import { PhotoMetadata } from "@/lib/metadata/types";
 import { SummitPhotoCreate } from "@/lib/photos/types";
+import { PeakStep } from "./components/PeakStep";
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [metadata, setMetadata] = useState<PhotoMetadata>({});
   const [summitPhotoCreate, setSummitPhotoCreate] =
     useState<SummitPhotoCreate | null>(null);
-  const { step, next, back } = useStepper(3);
+  const { step, next, back } = useStepper(4);
 
   const renderStep = () => {
     switch (step) {
@@ -26,7 +27,6 @@ export default function UploadPage() {
       case 1:
         return (
           <MetadataStep
-            file={file}
             metadata={metadata}
             setSummitPhotoCreate={setSummitPhotoCreate}
             back={back}
@@ -34,6 +34,15 @@ export default function UploadPage() {
           />
         );
       case 2:
+        return (
+          <PeakStep
+            summitPhotoCreate={summitPhotoCreate}
+            setSummitPhotoCreate={setSummitPhotoCreate}
+            back={back}
+            next={next}
+          />
+        );
+      case 3:
         return (
           <UploadStep
             file={file}
