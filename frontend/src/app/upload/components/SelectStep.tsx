@@ -8,6 +8,7 @@ import { photoMetadataService } from "@/lib/metadata/service";
 import { PhotoMetadata } from "@/lib/metadata/types";
 import { useMutation } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
+import { MessageBlock } from "@/components/common/MessageBlock";
 
 interface SelectStepProps {
   setFile: (file: File) => void;
@@ -48,17 +49,17 @@ export function SelectStep({ setFile, setMetadata, next }: SelectStepProps) {
         mutation.isPending && "opacity-50 cursor-not-allowed",
       )}
     >
-      <div className="p-4 mb-4 bg-secondary rounded-full">
-        <Upload className="w-10 h-10 text-primary" />
-      </div>
-      <h3 className="text-lg font-semibold mb-2 text-foreground">
-        {mutation.isPending
-          ? "Extracting metadata..."
-          : "Drag and drop or click to upload"}
-      </h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        Support for JPG, PNG files. Metadata will be extracted automatically.
-      </p>
+      <MessageBlock
+        iconComponent={Upload}
+        title={
+          mutation.isPending
+            ? "Extracting metadata..."
+            : "Drag and drop or click to upload"
+        }
+        description="Support for JPG, PNG files. Metadata will be extracted automatically."
+        className="mb-4"
+      />
+
       <Button disabled={mutation.isPending}>
         {mutation.isPending && <Spinner />}
         {mutation.isPending ? "Processing..." : "Select File"}

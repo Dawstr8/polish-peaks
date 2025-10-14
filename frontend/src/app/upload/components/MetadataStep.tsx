@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { MetadataDisplay } from "@/app/upload/components/MetadataDisplay";
+import { MetadataDisplay } from "@/components/metadata/MetadataDisplay";
 import { PhotoMetadata } from "@/lib/metadata/types";
 import { photoMetadataService } from "@/lib/metadata/service";
 import { SummitPhotoCreate } from "@/lib/photos/types";
@@ -38,6 +38,7 @@ export function MetadataStep({
       <MetadataDisplay
         metadata={metadata}
         formatter={photoMetadataService.getFormatter()}
+        className="bg-muted/20"
       />
 
       {metadata.latitude && metadata.longitude && (
