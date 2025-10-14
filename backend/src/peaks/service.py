@@ -46,7 +46,11 @@ class PeakService:
         return self.peak_repository.get_by_id(peak_id)
 
     def find_nearest_peaks(
-        self, latitude: float, longitude: float, limit: int = 5
+        self,
+        latitude: float,
+        longitude: float,
+        max_distance: float | None = None,
+        limit: int = 5,
     ) -> List[Dict[str, Any]]:
         """
         Find the nearest peaks to a given latitude and longitude using Haversine distance.
@@ -73,6 +77,11 @@ class PeakService:
             }
             for peak in peaks
         ]
+
+        if max_distance is not None:
+            peaks_with_distance = [
+                peak for peak in peaks_with_distance if peak["distance"] <= max_distance
+            ]
 
         peaks_by_nearest = sorted(peaks_with_distance, key=lambda x: x["distance"])
 

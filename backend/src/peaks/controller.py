@@ -22,6 +22,7 @@ def find_nearest_peaks(
     repository: PeakServiceDep,
     latitude: float,
     longitude: float,
+    max_distance: float | None = None,
     limit: int = 5,
 ):
     """
@@ -30,13 +31,14 @@ def find_nearest_peaks(
     Args:
         latitude: Latitude coordinate
         longitude: Longitude coordinate
+        max_distance: Maximum distance in meters (optional)
         limit: Maximum number of peaks to return (default: 5)
 
     Returns:
         List of nearest peaks with distances in meters
     """
     return repository.find_nearest_peaks(
-        latitude=latitude, longitude=longitude, limit=limit
+        latitude=latitude, longitude=longitude, max_distance=max_distance, limit=limit
     )
 
 

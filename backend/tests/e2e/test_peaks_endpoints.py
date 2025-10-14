@@ -128,6 +128,46 @@ def test_find_nearest_peaks_empty_database(
     assert response.json() == []
 
 
+def test_find_nearest_peaks_with_max_distance(
+    client_with_db: TestClient, test_peaks: list[Peak], peak_coords: dict
+):
+    """Test finding nearest peaks with max_distance filter"""
+
+    response = client_with_db.get(
+        "/api/peaks/find",
+        params={
+            "latitude": peak_coords["near_rysy"][0],
+            "longitude": peak_coords["near_rysy"][1],
+            "max_distance": 100,
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["peak"]["name"] == "Rysy"
+    assert data[0]["distance"] < 100
+
+
+def test_find_nearest_peaks_max_distance_none(
+    client_with_db: TestClient, test_peaks: list[Peak], peak_coords: dict
+):
+    """Test finding nearest peaks without max_distance (should include all)"""
+    response = client_with_db.get(
+        "/api/peaks/find",
+        params={
+            "latitude": peak_coords["near_rysy"][0],
+            "longitude": peak_coords["near_rysy"][1],
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 3
+    assert data[0]["peak"]["name"] == "Rysy"
+    assert data[0]["distance"] < 100
+
+
 def test_find_nearest_peaks_missing_parameters(
     client_with_db: TestClient, peak_coords: dict
 ):
