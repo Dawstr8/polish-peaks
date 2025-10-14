@@ -6,6 +6,12 @@ import { PhotoMetadata } from "@/lib/metadata/types";
 import { photoMetadataService } from "@/lib/metadata/service";
 import { SummitPhotoCreate } from "@/lib/photos/types";
 import { mapPhotoMetadataToSummitPhotoCreate } from "@/lib/photos/mappers";
+import dynamic from "next/dynamic";
+
+const LocationMap = dynamic(
+  () => import("./LocationMap").then((mod) => mod.LocationMap),
+  { ssr: false },
+);
 
 interface MetadataStepProps {
   file: File | null;
@@ -33,6 +39,25 @@ export function MetadataStep({
         metadata={metadata}
         formatter={photoMetadataService.getFormatter()}
       />
+
+      {metadata.latitude && metadata.longitude && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-muted-foreground">
+            Location Preview
+          </h4>
+          <LocationMap
+            locations={[
+              {
+                index: "photo-location",
+                latitude: metadata.latitude,
+                longitude: metadata.longitude,
+                title: "Photo Location",
+                popupContent: `${photoMetadataService.getFormatter().formatLatitude(metadata.latitude)} ${photoMetadataService.getFormatter().formatLongitude(metadata.longitude)}`,
+              },
+            ]}
+          />
+        </div>
+      )}
       <div className="flex justify-center gap-4">
         <Button variant="outline" onClick={back}>
           Back
