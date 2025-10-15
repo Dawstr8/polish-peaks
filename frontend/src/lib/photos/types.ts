@@ -1,3 +1,5 @@
+import { Peak } from "@/lib/peaks/types";
+
 export interface SummitPhoto {
   id?: number;
   file_name: string;
@@ -8,6 +10,7 @@ export interface SummitPhoto {
   altitude?: number;
   peak_id?: number;
   distance_to_peak?: number;
+  peak?: Peak;
 }
 
 export interface SummitPhotoCreate {

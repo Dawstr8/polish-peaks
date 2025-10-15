@@ -11,6 +11,20 @@ import { ApiClient } from "@/lib/common/api-client";
  */
 export class PhotoClient extends ApiClient {
   /**
+   * Get all summit photos from the backend
+   * @param sortBy Optional field to sort by
+   * @param order Optional order of sorting (asc or desc)
+   * @returns A list of all summit photos
+   * @throws Error if the request fails
+   */
+  static async getAllPhotos(
+    sortBy: string | null = null,
+    order: "asc" | "desc" | null = null,
+  ): Promise<SummitPhoto[]> {
+    return this.get<SummitPhoto[]>(API_ENDPOINTS.photos.getAll(sortBy, order));
+  }
+
+  /**
    * Upload a photo file to the backend
    * @param file The file to upload
    * @returns The uploaded photo data
