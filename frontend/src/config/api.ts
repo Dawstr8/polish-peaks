@@ -10,12 +10,31 @@
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
 
+export const UPLOADS_BASE_URL =
+  process.env.NEXT_PUBLIC_UPLOADS_BASE_URL || "http://localhost:8000/uploads";
+
 /**
  * API endpoints
  * @description These are the API endpoints used throughout the application
  */
 export const API_ENDPOINTS = {
   photos: {
+    getAll: (
+      sort_by: string | null = null,
+      order: "asc" | "desc" | null = null,
+    ) => {
+      const params = new URLSearchParams();
+
+      if (sort_by) {
+        params.append("sort_by", sort_by);
+      }
+
+      if (order) {
+        params.append("order", order);
+      }
+
+      return `${API_BASE_URL}/photos?${params.toString()}`;
+    },
     post: `${API_BASE_URL}/photos`,
   },
   peaks: {
