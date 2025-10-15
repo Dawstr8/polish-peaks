@@ -202,7 +202,7 @@ async def test_get_all_photos(photo_service, mock_photo_repository):
     result = await photo_service.get_all_photos()
 
     assert result == test_photos
-    mock_photo_repository.get_all.assert_called_once()
+    mock_photo_repository.get_all.assert_called_once_with(sort_by=None, order=None)
 
 
 @pytest.mark.asyncio

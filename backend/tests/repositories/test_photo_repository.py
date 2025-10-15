@@ -112,6 +112,32 @@ def test_get_all(test_photo_repository, test_photos):
     assert first_test_photo.distance_to_peak == 10.5
 
 
+def test_get_all_sorted_by_captured_at_asc(test_photo_repository, test_photos):
+    """Test retrieving all summit photos sorted by captured_at ascending"""
+    photos = test_photo_repository.get_all(sort_by="captured_at", order="asc")
+
+    assert photos is not None
+    assert len(photos) >= 2
+
+    captured_times = [
+        photo.captured_at for photo in photos if photo.captured_at is not None
+    ]
+    assert captured_times == sorted(captured_times)
+
+
+def test_get_all_sorted_by_captured_at_desc(test_photo_repository, test_photos):
+    """Test retrieving all summit photos sorted by captured_at descending"""
+    photos = test_photo_repository.get_all(sort_by="captured_at", order="desc")
+
+    assert photos is not None
+    assert len(photos) >= 2
+
+    captured_times = [
+        photo.captured_at for photo in photos if photo.captured_at is not None
+    ]
+    assert captured_times == sorted(captured_times, reverse=True)
+
+
 def test_delete(test_photo_repository, test_photos):
     """Test deleting a summit photo"""
     photo_id = test_photos[0].id

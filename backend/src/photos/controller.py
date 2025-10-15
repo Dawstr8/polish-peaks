@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 
 from src.photos.dependencies import PhotoServiceDep
 from src.photos.model import SummitPhoto, SummitPhotoCreate
@@ -11,15 +11,21 @@ router = APIRouter(prefix="/api/photos", tags=["photos"])
 @router.get("/", response_model=List[SummitPhoto], tags=["photos"])
 async def get_all_photos(
     photo_service: PhotoServiceDep,
+    sort_by: Optional[str] = Query(None, description="Field to sort by"),
+    order: Optional[str] = Query(None, description="Sort order: 'asc' or 'desc'"),
 ):
     """
-    Get all uploaded photos
+    Get all uploaded photos, optionally sorted by a field.
+
+    Args:
+        sort_by: Field to sort by (optional).
+        order: Sort order 'desc' for descending, otherwise ascending (SQL default). Only used if sort_by is provided.
 
     Returns:
-        List[SummitPhoto]: List of all uploaded photos
+        List[SummitPhoto]: List of all uploaded photos, sorted as specified or in default order.
     """
     try:
-        return await photo_service.get_all_photos()
+        return await photo_service.get_all_photos(sort_by=sort_by, order=order)
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve photos: {str(e)}"

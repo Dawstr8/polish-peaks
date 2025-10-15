@@ -57,6 +57,123 @@ def test_get_all_photos(client_with_db):
         assert "file_name" in photo
 
 
+def test_get_all_photos_sorted_by_captured_at_asc(client_with_db):
+    """Test getting all photos sorted by captured_at ascending"""
+
+    photo_data_1 = {
+        "captured_at": "2025-09-30T10:00:00",
+        "latitude": 49.1794,
+        "longitude": 20.0880,
+        "altitude": 2495.0,
+    }
+
+    photo_data_2 = {
+        "captured_at": "2025-10-01T11:00:00",
+        "latitude": 50.7361,
+        "longitude": 15.7398,
+        "altitude": 1602.0,
+    }
+
+    client_with_db.post(
+        "/api/photos/",
+        files={"file": ("photo1.jpg", b"imagedata1", "image/jpeg")},
+        data={"summit_photo_create": json.dumps(photo_data_1)},
+    )
+
+    client_with_db.post(
+        "/api/photos/",
+        files={"file": ("photo2.jpg", b"imagedata2", "image/jpeg")},
+        data={"summit_photo_create": json.dumps(photo_data_2)},
+    )
+
+    resp = client_with_db.get("/api/photos/?sort_by=captured_at&order=asc")
+
+    assert resp.status_code == 200
+    photos = resp.json()
+    assert len(photos) >= 2
+
+    captured_times = [photo["captured_at"] for photo in photos if photo["captured_at"]]
+    assert captured_times == sorted(captured_times)
+
+
+def test_get_all_photos_sorted_by_captured_at_desc(client_with_db):
+    """Test getting all photos sorted by captured_at descending"""
+
+    photo_data_1 = {
+        "captured_at": "2025-09-30T10:00:00",
+        "latitude": 49.1794,
+        "longitude": 20.0880,
+        "altitude": 2495.0,
+    }
+
+    photo_data_2 = {
+        "captured_at": "2025-10-01T11:00:00",
+        "latitude": 50.7361,
+        "longitude": 15.7398,
+        "altitude": 1602.0,
+    }
+
+    client_with_db.post(
+        "/api/photos/",
+        files={"file": ("photo1.jpg", b"imagedata1", "image/jpeg")},
+        data={"summit_photo_create": json.dumps(photo_data_1)},
+    )
+
+    client_with_db.post(
+        "/api/photos/",
+        files={"file": ("photo2.jpg", b"imagedata2", "image/jpeg")},
+        data={"summit_photo_create": json.dumps(photo_data_2)},
+    )
+
+    resp = client_with_db.get("/api/photos/?sort_by=captured_at&order=desc")
+
+    assert resp.status_code == 200
+    photos = resp.json()
+    assert len(photos) >= 2
+
+    captured_times = [photo["captured_at"] for photo in photos if photo["captured_at"]]
+    assert captured_times == sorted(captured_times, reverse=True)
+
+
+def test_get_all_photos_sorted_by_captured_at_default_order(client_with_db):
+    """Test getting all photos sorted by captured_at with default ascending order"""
+
+    photo_data_1 = {
+        "captured_at": "2025-09-30T10:00:00",
+        "latitude": 49.1794,
+        "longitude": 20.0880,
+        "altitude": 2495.0,
+    }
+
+    photo_data_2 = {
+        "captured_at": "2025-10-01T11:00:00",
+        "latitude": 50.7361,
+        "longitude": 15.7398,
+        "altitude": 1602.0,
+    }
+
+    client_with_db.post(
+        "/api/photos/",
+        files={"file": ("photo1.jpg", b"imagedata1", "image/jpeg")},
+        data={"summit_photo_create": json.dumps(photo_data_1)},
+    )
+
+    client_with_db.post(
+        "/api/photos/",
+        files={"file": ("photo2.jpg", b"imagedata2", "image/jpeg")},
+        data={"summit_photo_create": json.dumps(photo_data_2)},
+    )
+
+    resp = client_with_db.get("/api/photos/?sort_by=captured_at")
+
+    assert resp.status_code == 200
+    photos = resp.json()
+    assert len(photos) >= 2
+
+    captured_times = [photo["captured_at"] for photo in photos if photo["captured_at"]]
+    assert captured_times == sorted(captured_times)
+
+
 def test_upload_photo_success(client_with_db):
     """Test successful photo upload"""
 
