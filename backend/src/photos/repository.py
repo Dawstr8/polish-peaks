@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlmodel import select
+from sqlmodel import desc, select
 
 from src.database.core import DbSession
 from src.photos.model import SummitPhoto
@@ -47,14 +47,29 @@ class PhotoRepository:
         """
         return self.db.get(SummitPhoto, photo_id)
 
-    def get_all(self) -> List[SummitPhoto]:
+    def get_all(
+        self, sort_by: Optional[str] = None, order: Optional[str] = None
+    ) -> List[SummitPhoto]:
         """
-        Get all photos from the database.
+        Get all photos from the database, optionally sorted.
+
+        Args:
+            sort_by: Field to sort by (optional)
+            order: Sort order 'desc' for descending, otherwise ascending (SQL default)
 
         Returns:
             List of SummitPhoto objects
         """
         statement = select(SummitPhoto)
+
+        if sort_by and hasattr(SummitPhoto, sort_by):
+            column = getattr(SummitPhoto, sort_by)
+            statement = (
+                statement.order_by(desc(column))
+                if order == "desc"
+                else statement.order_by(column)
+            )
+
         results = self.db.exec(statement).all()
         return results
 

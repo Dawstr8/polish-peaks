@@ -67,14 +67,20 @@ class PhotoService:
         """
         return self._photo_repository.get_by_id(photo_id)
 
-    async def get_all_photos(self) -> List[SummitPhoto]:
+    async def get_all_photos(
+        self, sort_by: Optional[str] = None, order: Optional[str] = None
+    ) -> List[SummitPhoto]:
         """
-        Get all photos from the database.
+        Get all photos from the database, optionally sorted.
+
+        Args:
+            sort_by: Field to sort by (optional)
+            order: Sort order 'desc' for descending, otherwise ascending (SQL default)
 
         Returns:
             List[SummitPhoto]: List of all photos
         """
-        return self._photo_repository.get_all()
+        return self._photo_repository.get_all(sort_by=sort_by, order=order)
 
     async def delete_photo(self, photo_id: int) -> bool:
         """
