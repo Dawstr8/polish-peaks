@@ -3,12 +3,12 @@ from typing import List, Optional
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 
 from src.photos.dependencies import PhotoServiceDep
-from src.photos.model import SummitPhoto, SummitPhotoCreate
+from src.photos.model import SummitPhotoCreate, SummitPhotoRead
 
 router = APIRouter(prefix="/api/photos", tags=["photos"])
 
 
-@router.get("/", response_model=List[SummitPhoto], tags=["photos"])
+@router.get("/", response_model=List[SummitPhotoRead], tags=["photos"])
 async def get_all_photos(
     photo_service: PhotoServiceDep,
     sort_by: Optional[str] = Query(None, description="Field to sort by"),
@@ -22,7 +22,7 @@ async def get_all_photos(
         order: Sort order 'desc' for descending, otherwise ascending (SQL default). Only used if sort_by is provided.
 
     Returns:
-        List[SummitPhoto]: List of all uploaded photos, sorted as specified or in default order.
+        List[SummitPhotoRead]: List of all uploaded photos, with peak information, sorted as specified or in default order.
     """
     try:
         return await photo_service.get_all_photos(sort_by=sort_by, order=order)
@@ -32,7 +32,7 @@ async def get_all_photos(
         )
 
 
-@router.post("/", response_model=SummitPhoto, tags=["photos"])
+@router.post("/", response_model=SummitPhotoRead, tags=["photos"])
 async def upload_photo(
     photo_service: PhotoServiceDep,
     file: UploadFile = File(...),
@@ -46,7 +46,7 @@ async def upload_photo(
         summit_photo_create: Metadata for the photo (captured_at, latitude, longitude, altitude, peak_id, distance_to_peak)
 
     Returns:
-        SummitPhoto: The uploaded photo object
+        SummitPhotoRead: The uploaded photo object with peak information
     """
     summit_photo_create = SummitPhotoCreate.model_validate_json(summit_photo_create)
 
@@ -58,7 +58,7 @@ async def upload_photo(
         raise HTTPException(status_code=500, detail=f"Failed to upload photo: {str(e)}")
 
 
-@router.get("/{photo_id}", response_model=SummitPhoto, tags=["photos"])
+@router.get("/{photo_id}", response_model=SummitPhotoRead, tags=["photos"])
 async def get_photo_by_id(
     photo_id: int,
     photo_service: PhotoServiceDep,
@@ -70,7 +70,7 @@ async def get_photo_by_id(
         photo_id: ID of the photo to retrieve
 
     Returns:
-        SummitPhoto: The requested photo
+        SummitPhotoRead: The requested photo object with peak information
     """
     photo = await photo_service.get_photo_by_id(photo_id)
     if not photo:

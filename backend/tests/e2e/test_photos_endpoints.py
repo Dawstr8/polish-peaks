@@ -57,6 +57,46 @@ def test_get_all_photos(client_with_db):
         assert "file_name" in photo
 
 
+def test_get_all_photos_with_peaks(client_with_db, test_peaks):
+    """Test getting all photos includes peak information when assigned"""
+
+    client_with_db.post(
+        "/api/photos/",
+        files={"file": ("photo1.jpg", b"imagedata1", "image/jpeg")},
+        data={"summit_photo_create": "{}"},
+    )
+
+    photo_data_with_peak = {
+        "peak_id": test_peaks[0].id,
+        "distance_to_peak": 10.5,
+    }
+
+    client_with_db.post(
+        "/api/photos/",
+        files={"file": ("photo2.jpg", b"imagedata2", "image/jpeg")},
+        data={"summit_photo_create": json.dumps(photo_data_with_peak)},
+    )
+
+    resp = client_with_db.get("/api/photos/")
+
+    assert resp.status_code == 200
+    photos = resp.json()
+    assert len(photos) >= 2
+
+    photo_without_peak = next((p for p in photos if p["peak_id"] is None), None)
+    photo_with_peak = next(
+        (p for p in photos if p["peak_id"] == test_peaks[0].id), None
+    )
+
+    assert photo_without_peak is not None
+    assert photo_without_peak["peak"] is None
+
+    assert photo_with_peak is not None
+    assert photo_with_peak["peak"] is not None
+    assert photo_with_peak["peak"]["id"] == test_peaks[0].id
+    assert photo_with_peak["peak"]["name"] == test_peaks[0].name
+
+
 def test_get_all_photos_sorted_by_captured_at_asc(client_with_db):
     """Test getting all photos sorted by captured_at ascending"""
 

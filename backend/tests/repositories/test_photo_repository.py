@@ -54,7 +54,7 @@ def test_photos(test_db, test_peaks, peak_coords):
     return photos
 
 
-def test_save(test_photo_repository):
+def test_save(test_photo_repository, test_peaks):
     """Test saving a new summit photo"""
     new_photo = SummitPhoto(
         file_name="new_photo.jpg",
@@ -63,6 +63,7 @@ def test_save(test_photo_repository):
         longitude=19.5295,
         altitude=1720,
         distance_to_peak=3.8,
+        peak_id=test_peaks[0].id,
     )
 
     saved_photo = test_photo_repository.save(new_photo)
@@ -74,6 +75,8 @@ def test_save(test_photo_repository):
     assert saved_photo.longitude == 19.5295
     assert saved_photo.altitude == 1720
     assert saved_photo.distance_to_peak == 3.8
+    assert saved_photo.peak == test_peaks[0]
+    assert saved_photo.peak.id == test_peaks[0].id
 
 
 def test_get_by_id(test_photo_repository, test_photos):
@@ -86,6 +89,8 @@ def test_get_by_id(test_photo_repository, test_photos):
     assert photo.file_name == "test1.jpg"
     assert photo.peak_id == test_photos[0].peak_id
     assert photo.distance_to_peak == 10.5
+    assert photo.peak is not None
+    assert photo.peak.id == test_photos[0].peak_id
 
 
 def test_get_by_id_non_existent(test_photo_repository):
@@ -110,6 +115,8 @@ def test_get_all(test_photo_repository, test_photos):
     assert first_test_photo.file_name == "test1.jpg"
     assert first_test_photo.peak_id == test_photos[0].peak_id
     assert first_test_photo.distance_to_peak == 10.5
+    assert first_test_photo.peak is not None
+    assert first_test_photo.peak.id == test_photos[0].peak_id
 
 
 def test_get_all_sorted_by_captured_at_asc(test_photo_repository, test_photos):
