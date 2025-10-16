@@ -42,7 +42,7 @@ class PhotoService:
             summit_photo_create: Metadata for the photo (captured_at, latitude, longitude, altitude, peak_id, distance_to_peak)
 
         Returns:
-            SummitPhoto: The saved photo object
+            SummitPhoto: The saved photo object with peak information
         """
         path = await self._upload_service.save_file(file, content_type_prefix="image/")
 
@@ -63,7 +63,7 @@ class PhotoService:
             photo_id: ID of the photo to retrieve
 
         Returns:
-            SummitPhoto if found, None otherwise
+            SummitPhoto with peak information if found, None otherwise
         """
         return self._photo_repository.get_by_id(photo_id)
 
@@ -78,7 +78,7 @@ class PhotoService:
             order: Sort order 'desc' for descending, otherwise ascending (SQL default)
 
         Returns:
-            List[SummitPhoto]: List of all photos
+            List[SummitPhoto]: List of all photos with peak information
         """
         return self._photo_repository.get_all(sort_by=sort_by, order=order)
 
