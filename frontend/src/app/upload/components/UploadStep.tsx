@@ -4,11 +4,12 @@ import { PhotoClient } from "@/lib/photos/client";
 import { useMutation } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
-import { UploadSuccess } from "@/components/upload/UploadSuccess";
 import { SummitPhoto, SummitPhotoCreate } from "@/lib/photos/types";
 import { SummitPhotoCard } from "@/components/photos/SummitPhotoCard";
 import { photoMetadataService } from "@/lib/metadata/service";
 import { Peak } from "@/lib/peaks/types";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface UploadStepProps {
   file: File;
@@ -23,7 +24,9 @@ export function UploadStep({
   selectedPeak,
   back,
 }: UploadStepProps) {
-  const { isPending, isSuccess, isError, error, mutate } = useMutation({
+  const router = useRouter();
+
+  const { isPending, isError, error, mutate } = useMutation({
     mutationFn: ({
       file,
       summitPhotoCreate,
@@ -31,19 +34,11 @@ export function UploadStep({
       file: File;
       summitPhotoCreate: SummitPhotoCreate | null;
     }) => PhotoClient.uploadPhoto(file, summitPhotoCreate),
+    onSuccess: () => {
+      toast.success("Photo uploaded successfully!");
+      router.push("/gallery");
+    },
   });
-
-  if (isSuccess) {
-    return <UploadSuccess />;
-  }
-
-  if (isError) {
-    return (
-      <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg">
-        {error.message}
-      </div>
-    );
-  }
 
   const summitPhoto = {
     ...summitPhotoCreate,
@@ -55,6 +50,12 @@ export function UploadStep({
 
   return (
     <div className="space-y-6">
+      {isError && (
+        <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg">
+          {error.message}
+        </div>
+      )}
+
       <SummitPhotoCard
         summitPhoto={summitPhoto}
         formatter={photoMetadataService.getFormatter()}
