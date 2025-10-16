@@ -47,7 +47,7 @@ export function SummitPhotoCard({
       </CardHeader>
 
       <Image
-        src={`${uploadsBaseUrl}${uploadsBaseUrl && "/"}${summitPhoto.file_name}`}
+        src={`${uploadsBaseUrl}${summitPhoto.file_name}`}
         alt={`Summit photo ${summitPhoto.id}`}
         width={1200}
         height={800}
