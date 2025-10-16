@@ -25,12 +25,14 @@ interface SummitPhotoCardProps {
   summitPhoto: SummitPhoto;
   formatter: PhotoMetadataFormatter;
   className?: string;
+  uploadsBaseUrl?: string;
 }
 
 export function SummitPhotoCard({
   summitPhoto,
   formatter,
   className,
+  uploadsBaseUrl = UPLOADS_BASE_URL,
 }: SummitPhotoCardProps) {
   return (
     <Card className={className}>
@@ -45,7 +47,7 @@ export function SummitPhotoCard({
       </CardHeader>
 
       <Image
-        src={`${UPLOADS_BASE_URL}/${summitPhoto.file_name}`}
+        src={`${uploadsBaseUrl}${uploadsBaseUrl && "/"}${summitPhoto.file_name}`}
         alt={`Summit photo ${summitPhoto.id}`}
         width={1200}
         height={800}

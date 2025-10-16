@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { PeakClient } from "@/lib/peaks/client";
-import { PeakWithDistance } from "@/lib/peaks/types";
+import { Peak, PeakWithDistance } from "@/lib/peaks/types";
 import { SummitPhotoCreate } from "@/lib/photos/types";
 import { PeakSelect } from "./PeaksSelect";
 
@@ -14,6 +14,7 @@ const LIMIT = 6;
 interface PeakStepProps {
   summitPhotoCreate: SummitPhotoCreate | null;
   setSummitPhotoCreate: (summitPhotoCreate: SummitPhotoCreate) => void;
+  setSelectedPeak: (peak: Peak) => void;
   back: () => void;
   next: () => void;
 }
@@ -21,6 +22,7 @@ interface PeakStepProps {
 export function PeakStep({
   summitPhotoCreate,
   setSummitPhotoCreate,
+  setSelectedPeak,
   back,
   next,
 }: PeakStepProps) {
@@ -40,7 +42,7 @@ export function PeakStep({
 
   const handleSelect = ({ peak, distance }: PeakWithDistance) => {
     setSelectedPeakId(peak.id);
-
+    setSelectedPeak(peak);
     setSummitPhotoCreate({
       ...summitPhotoCreate,
       peak_id: peak.id,
