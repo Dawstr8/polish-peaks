@@ -2,6 +2,9 @@
  * Base API client class for making HTTP requests to the backend
  */
 
+import axios, { AxiosInstance, AxiosError } from "axios";
+import { API_BASE_URL } from "@/config/api";
+
 /**
  * Error response from the API
  */
@@ -15,148 +18,119 @@ interface ApiErrorResponse {
  * Base API client class
  */
 export class ApiClient {
+  private static instance: AxiosInstance;
+
+  protected static getInstance(baseUrl: string = API_BASE_URL): AxiosInstance {
+    if (!this.instance) {
+      this.instance = axios.create({
+        baseURL: baseUrl,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      this.instance.interceptors.response.use(
+        (response) => response,
+        (error: AxiosError) => {
+          return Promise.reject(this.handleError(error));
+        },
+      );
+    }
+    return this.instance;
+  }
+
   /**
    * Handles API errors consistently
-   * @param response Fetch Response object
+   * @param error Axios error object
    * @returns Error object with appropriate message
    */
-  protected static async handleError(response: Response): Promise<Error> {
-    let errorMessage = `Request failed with status: ${response.status}`;
+  private static handleError(error: AxiosError): Error {
+    if (error.response) {
+      const status = error.response.status;
+      let errorMessage = `Request failed with status: ${status}`;
 
-    try {
-      const errorData = (await response.json()) as ApiErrorResponse;
+      try {
+        const errorData = error.response.data as ApiErrorResponse;
 
-      if (errorData.message) {
-        errorMessage = errorData.message;
-      } else if (errorData.errors) {
-        const errorMessages = Object.entries(errorData.errors)
-          .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
-          .join("; ");
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.errors) {
+          const errorMessages = Object.entries(errorData.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+            .join("; ");
 
-        errorMessage = errorMessages || errorMessage;
-      }
-    } catch {}
+          errorMessage = errorMessages || errorMessage;
+        }
+      } catch {}
 
-    return new Error(errorMessage);
+      return new Error(errorMessage);
+    }
+
+    if (error.request) {
+      return new Error("Network error: No response received from server");
+    }
+
+    return new Error(error.message || "An unexpected error occurred");
   }
 
   /**
    * Make a GET request
-   * @param url URL to fetch
-   * @param options Fetch options
-   * @returns Parsed response
+   * @param url URL to fetch (relative to base URL)
+   * @param config Additional axios config
+   * @returns Parsed response data
    */
   protected static async get<T>(
     url: string,
-    options?: RequestInit,
+    config?: Parameters<AxiosInstance["get"]>[1],
   ): Promise<T> {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        ...options?.headers,
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw await this.handleError(response);
-    }
-
-    return response.json();
+    const response = await this.getInstance().get<T>(url, config);
+    return response.data;
   }
 
   /**
    * Make a POST request
-   * @param url URL to post to
+   * @param url URL to post to (relative to base URL)
    * @param data Data to send
-   * @param options Fetch options
-   * @returns Parsed response
+   * @param config Additional axios config
+   * @returns Parsed response data
    */
   protected static async post<T>(
     url: string,
-    data?: unknown,
-    options?: RequestInit,
+    data?: Parameters<AxiosInstance["post"]>[1],
+    config?: Parameters<AxiosInstance["post"]>[2],
   ): Promise<T> {
-    const isFormData = data instanceof FormData;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        ...(!isFormData ? { "Content-Type": "application/json" } : {}),
-        Accept: "application/json",
-        ...options?.headers,
-      },
-      body: isFormData ? data : JSON.stringify(data),
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw await this.handleError(response);
-    }
-
-    return response.json();
+    const response = await this.getInstance().post<T>(url, data, config);
+    return response.data;
   }
 
   /**
    * Make a PUT request
-   * @param url URL to put to
+   * @param url URL to put to (relative to base URL)
    * @param data Data to send
-   * @param options Fetch options
-   * @returns Parsed response
+   * @param config Additional axios config
+   * @returns Parsed response data
    */
   protected static async put<T>(
     url: string,
-    data: unknown,
-    options?: RequestInit,
+    data: Parameters<AxiosInstance["put"]>[1],
+    config?: Parameters<AxiosInstance["put"]>[2],
   ): Promise<T> {
-    const isFormData = data instanceof FormData;
-
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        ...(!isFormData ? { "Content-Type": "application/json" } : {}),
-        Accept: "application/json",
-        ...options?.headers,
-      },
-      body: isFormData ? data : JSON.stringify(data),
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw await this.handleError(response);
-    }
-
-    return response.json();
+    const response = await this.getInstance().put<T>(url, data, config);
+    return response.data;
   }
 
   /**
    * Make a DELETE request
-   * @param url URL to delete
-   * @param options Fetch options
-   * @returns Parsed response or void
+   * @param url URL to delete (relative to base URL)
+   * @param config Additional axios config
+   * @returns Parsed response data or void
    */
   protected static async delete<T = void>(
     url: string,
-    options?: RequestInit,
+    config?: Parameters<AxiosInstance["delete"]>[1],
   ): Promise<T> {
-    const response = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        Accept: "application/json",
-        ...options?.headers,
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw await this.handleError(response);
-    }
-
-    if (response.status === 204) {
-      return {} as T;
-    }
-
-    return response.json();
+    const response = await this.getInstance().delete<T>(url, config);
+    return response.data;
   }
 }

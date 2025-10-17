@@ -3,13 +3,17 @@
  */
 
 import { SummitPhoto, SummitPhotoCreate } from "@/lib/photos/types";
-import { API_ENDPOINTS } from "@/config/api";
+import { API_BASE_URL, API_ENDPOINTS } from "@/config/api";
 import { ApiClient } from "@/lib/common/api-client";
 
 /**
  * PhotoClient class for handling photo-related API requests
  */
 export class PhotoClient extends ApiClient {
+  protected static getInstance() {
+    return super.getInstance(`${API_BASE_URL}/${API_ENDPOINTS.PHOTOS}`);
+  }
+
   /**
    * Get all summit photos from the backend
    * @param sortBy Optional field to sort by
@@ -21,7 +25,12 @@ export class PhotoClient extends ApiClient {
     sortBy: string | null = null,
     order: "asc" | "desc" | null = null,
   ): Promise<SummitPhoto[]> {
-    return this.get<SummitPhoto[]>(API_ENDPOINTS.photos.getAll(sortBy, order));
+    return this.get<SummitPhoto[]>("/", {
+      params: {
+        sortBy,
+        order,
+      },
+    });
   }
 
   /**
@@ -41,6 +50,10 @@ export class PhotoClient extends ApiClient {
       summitPhotoCreate ? JSON.stringify(summitPhotoCreate) : "",
     );
 
-    return this.post<SummitPhoto>(API_ENDPOINTS.photos.post, formData);
+    return this.post<SummitPhoto>("/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   }
 }

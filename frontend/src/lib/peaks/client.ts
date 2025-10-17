@@ -1,7 +1,7 @@
 /**
  * API client for interacting with the photo endpoints
  */
-import { API_ENDPOINTS } from "@/config/api";
+import { API_BASE_URL, API_ENDPOINTS } from "@/config/api";
 import { ApiClient } from "@/lib/common/api-client";
 import { PeakWithDistance } from "./types";
 
@@ -9,6 +9,10 @@ import { PeakWithDistance } from "./types";
  * PeakClient class for handling peak-related API requests
  */
 export class PeakClient extends ApiClient {
+  protected static getInstance() {
+    return super.getInstance(`${API_BASE_URL}/${API_ENDPOINTS.PEAKS}`);
+  }
+
   /**
    * Find nearby peaks based on latitude and longitude
    * @param latitude The latitude of the location
@@ -24,8 +28,13 @@ export class PeakClient extends ApiClient {
     max_distance?: number,
     limit: number = 5,
   ): Promise<PeakWithDistance[]> {
-    return this.get<PeakWithDistance[]>(
-      API_ENDPOINTS.peaks.find(latitude, longitude, max_distance, limit),
-    );
+    return this.get<PeakWithDistance[]>("/find", {
+      params: {
+        latitude,
+        longitude,
+        max_distance,
+        limit,
+      },
+    });
   }
 }
