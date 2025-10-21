@@ -22,6 +22,7 @@ app = FastAPI(
     title="Polish Peaks API",
     description="API for managing Polish mountain summit photos and achievements",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
