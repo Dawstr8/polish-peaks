@@ -7,7 +7,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.database.core import DbSession
+from src.database.core import db_dep
 from src.peaks.repository import PeakRepository
 from src.peaks.service import PeakService
 from src.photos.repository import PhotoRepository
@@ -22,13 +22,13 @@ def get_upload_service() -> UploadService:
     return UploadService(storage)
 
 
-def get_peak_service(db: DbSession) -> PeakService:
+def get_peak_service(db: db_dep) -> PeakService:
     """Provides a PeakService with repository."""
     repository = PeakRepository(db)
     return PeakService(repository)
 
 
-def get_photo_repository(db: DbSession) -> PhotoRepository:
+def get_photo_repository(db: db_dep) -> PhotoRepository:
     """Provides a PhotoRepository."""
     return PhotoRepository(db)
 
@@ -42,4 +42,4 @@ def get_photo_service(
     return PhotoService(upload_service, peak_service, photo_repository)
 
 
-PhotoServiceDep = Annotated[PhotoService, Depends(get_photo_service)]
+photo_service_dep = Annotated[PhotoService, Depends(get_photo_service)]

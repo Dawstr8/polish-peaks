@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 
-from src.photos.dependencies import PhotoServiceDep
+from src.photos.dependencies import photo_service_dep
 from src.photos.model import SummitPhotoCreate, SummitPhotoRead
 
 router = APIRouter(prefix="/api/photos", tags=["photos"])
@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api/photos", tags=["photos"])
 
 @router.get("/", response_model=List[SummitPhotoRead], tags=["photos"])
 async def get_all_photos(
-    photo_service: PhotoServiceDep,
+    photo_service: photo_service_dep,
     sort_by: Optional[str] = Query(None, description="Field to sort by"),
     order: Optional[str] = Query(None, description="Sort order: 'asc' or 'desc'"),
 ):
@@ -34,7 +34,7 @@ async def get_all_photos(
 
 @router.post("/", response_model=SummitPhotoRead, tags=["photos"])
 async def upload_photo(
-    photo_service: PhotoServiceDep,
+    photo_service: photo_service_dep,
     file: UploadFile = File(...),
     summit_photo_create: str = Form(...),
 ):
@@ -61,7 +61,7 @@ async def upload_photo(
 @router.get("/{photo_id}", response_model=SummitPhotoRead, tags=["photos"])
 async def get_photo_by_id(
     photo_id: int,
-    photo_service: PhotoServiceDep,
+    photo_service: photo_service_dep,
 ):
     """
     Get a specific photo by ID
@@ -82,7 +82,7 @@ async def get_photo_by_id(
 @router.delete("/{photo_id}", response_model=dict, tags=["photos"])
 async def delete_photo(
     photo_id: int,
-    photo_service: PhotoServiceDep,
+    photo_service: photo_service_dep,
 ):
     """
     Delete an uploaded photo by ID

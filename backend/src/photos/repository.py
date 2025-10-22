@@ -1,8 +1,7 @@
 from typing import List, Optional
 
-from sqlmodel import desc, select
+from sqlmodel import Session, desc, select
 
-from src.database.core import DbSession
 from src.photos.model import SummitPhoto
 
 
@@ -11,14 +10,14 @@ class PhotoRepository:
     Repository for SummitPhoto data access operations.
     """
 
-    def __init__(self, db: DbSession):
+    def __init__(self, db: Session):
         """
         Initialize the PhotoRepository.
 
         Args:
             db: Database session
         """
-        self.db: DbSession = db
+        self.db = db
 
     def save(self, photo: SummitPhoto) -> SummitPhoto:
         """

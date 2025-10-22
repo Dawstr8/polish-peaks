@@ -4,12 +4,12 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.database.core import DbSession
+from src.database.core import db_dep
 from src.users.repository import UsersRepository
 from src.users.service import UsersService
 
 
-def get_repository(db: DbSession) -> UsersRepository:
+def get_repository(db: db_dep) -> UsersRepository:
     """Provides a UsersRepository."""
     return UsersRepository(db)
 
