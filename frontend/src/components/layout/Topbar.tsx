@@ -35,7 +35,12 @@ export default function Topbar() {
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center space-x-2">
+            {/* Login Button */}
+            <Button asChild variant="outline">
+              <Link href="/login">Sign In</Link>
+            </Button>
+
             {/* Upload Button */}
             <Button asChild>
               <Link href="/upload">Share Your Summit</Link>
@@ -64,6 +69,11 @@ export default function Topbar() {
                     </Button>
                   );
                 })}
+
+                {/* Mobile Login Button */}
+                <Button asChild variant="outline" className="mt-4">
+                  <Link href="/login">Sign In</Link>
+                </Button>
 
                 {/* Mobile Upload Button */}
                 <Button asChild className="mt-4">
