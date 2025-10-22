@@ -1,4 +1,5 @@
-from src.database.core import DbSession
+from sqlmodel import Session
+
 from src.users.models import User
 
 
@@ -7,14 +8,14 @@ class UsersRepository:
     Repository for User data access operations.
     """
 
-    def __init__(self, db: DbSession):
+    def __init__(self, db: Session):
         """
         Initialize the UsersRepository.
 
         Args:
             db: Database session
         """
-        self.db: DbSession = db
+        self.db = db
 
     def save(self, user: User) -> User:
         """

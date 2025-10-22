@@ -1,8 +1,7 @@
 from typing import List, Optional
 
-from sqlmodel import select
+from sqlmodel import Session, select
 
-from src.database.core import DbSession
 from src.peaks.model import Peak
 
 
@@ -11,14 +10,14 @@ class PeakRepository:
     Repository for Peak data access operations.
     """
 
-    def __init__(self, db: DbSession):
+    def __init__(self, db: Session):
         """
         Initialize the PeakRepository.
 
         Args:
             db: Database session
         """
-        self.db: DbSession = db
+        self.db = db
 
     def get_all(self) -> List[Peak]:
         """
