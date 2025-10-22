@@ -5,24 +5,24 @@ Service for matching geographical coordinates to peaks
 from typing import Any, Dict, List, Optional
 
 from src.common.utils.geo import haversine_distance
-from src.peaks.model import Peak
-from src.peaks.repository import PeakRepository
+from src.peaks.models import Peak
+from src.peaks.repository import PeaksRepository
 
 
-class PeakService:
+class PeaksService:
     """
     Service for matching geographical coordinates to peaks
     based on haversine distance calculation.
     """
 
-    def __init__(self, peak_repository: PeakRepository):
+    def __init__(self, peaks_repository: PeaksRepository):
         """
-        Initialize the PeakService
+        Initialize the PeaksService
 
         Args:
-            peak_repository: Repository for accessing peak data
+            peaks_repository: Repository for accessing peak data
         """
-        self.peak_repository = peak_repository
+        self.peaks_repository = peaks_repository
 
     def get_all(self) -> List[Peak]:
         """
@@ -31,7 +31,7 @@ class PeakService:
         Returns:
             List of all peaks
         """
-        return self.peak_repository.get_all()
+        return self.peaks_repository.get_all()
 
     def get_by_id(self, peak_id: int) -> Optional[Peak]:
         """
@@ -43,7 +43,7 @@ class PeakService:
         Returns:
             Peak if found, None otherwise
         """
-        return self.peak_repository.get_by_id(peak_id)
+        return self.peaks_repository.get_by_id(peak_id)
 
     def find_nearest_peaks(
         self,
@@ -63,7 +63,7 @@ class PeakService:
         Returns:
             List of dictionaries containing peak and its distance from the point
         """
-        peaks = self.peak_repository.get_all()
+        peaks = self.peaks_repository.get_all()
 
         if not peaks:
             return []

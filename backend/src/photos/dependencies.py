@@ -8,38 +8,29 @@ from typing import Annotated
 from fastapi import Depends
 
 from src.database.core import db_dep
-from src.peaks.repository import PeakRepository
-from src.peaks.service import PeakService
-from src.photos.repository import PhotoRepository
-from src.photos.service import PhotoService
-from src.uploads.service import UploadService
+from src.photos.repository import PhotosRepository
+from src.photos.service import PhotosService
+from src.uploads.service import UploadsService
 from src.uploads.services.local_storage import LocalFileStorage
 
 
-def get_upload_service() -> UploadService:
-    """Provides a configured UploadService with LocalFileStorage."""
+def get_uploads_service() -> UploadsService:
+    """Provides a configured UploadsService with LocalFileStorage."""
     storage = LocalFileStorage()
-    return UploadService(storage)
+    return UploadsService(storage)
 
 
-def get_peak_service(db: db_dep) -> PeakService:
-    """Provides a PeakService with repository."""
-    repository = PeakRepository(db)
-    return PeakService(repository)
+def get_photos_repository(db: db_dep) -> PhotosRepository:
+    """Provides a PhotosRepository."""
+    return PhotosRepository(db)
 
 
-def get_photo_repository(db: db_dep) -> PhotoRepository:
-    """Provides a PhotoRepository."""
-    return PhotoRepository(db)
+def get_photos_service(
+    uploads_service: UploadsService = Depends(get_uploads_service),
+    photos_repository: PhotosRepository = Depends(get_photos_repository),
+) -> PhotosService:
+    """Provides a PhotosService with all required dependencies."""
+    return PhotosService(uploads_service, photos_repository)
 
 
-def get_photo_service(
-    upload_service: UploadService = Depends(get_upload_service),
-    peak_service: PeakService = Depends(get_peak_service),
-    photo_repository: PhotoRepository = Depends(get_photo_repository),
-) -> PhotoService:
-    """Provides a PhotoService with all required dependencies."""
-    return PhotoService(upload_service, peak_service, photo_repository)
-
-
-photo_service_dep = Annotated[PhotoService, Depends(get_photo_service)]
+photos_service_dep = Annotated[PhotosService, Depends(get_photos_service)]

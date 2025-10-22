@@ -2,17 +2,17 @@ from typing import List, Optional
 
 from sqlmodel import Session, select
 
-from src.peaks.model import Peak
+from src.peaks.models import Peak
 
 
-class PeakRepository:
+class PeaksRepository:
     """
     Repository for Peak data access operations.
     """
 
     def __init__(self, db: Session):
         """
-        Initialize the PeakRepository.
+        Initialize the PeaksRepository.
 
         Args:
             db: Database session

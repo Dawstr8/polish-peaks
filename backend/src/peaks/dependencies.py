@@ -5,18 +5,18 @@ from typing import Annotated
 from fastapi import Depends
 
 from src.database.core import db_dep
-from src.peaks.repository import PeakRepository
-from src.peaks.service import PeakService
+from src.peaks.repository import PeaksRepository
+from src.peaks.service import PeaksService
 
 
-def get_repository(db: db_dep) -> PeakRepository:
-    """Provides a PeakRepository."""
-    return PeakRepository(db)
+def get_repository(db: db_dep) -> PeaksRepository:
+    """Provides a PeaksRepository."""
+    return PeaksRepository(db)
 
 
-def get_service(repository: PeakRepository = Depends(get_repository)):
-    """Provides a PeakService with all required dependencies."""
-    return PeakService(repository)
+def get_service(repository: PeaksRepository = Depends(get_repository)):
+    """Provides a PeaksService with all required dependencies."""
+    return PeaksService(repository)
 
 
-peak_service_dep = Annotated[PeakService, Depends(get_service)]
+peaks_service_dep = Annotated[PeaksService, Depends(get_service)]

@@ -1,16 +1,16 @@
 """
-Tests for the PeakRepository
+Tests for the PeaksRepository
 """
 
 import pytest
 
-from src.peaks.repository import PeakRepository
+from src.peaks.repository import PeaksRepository
 
 
 @pytest.fixture()
 def test_repository(test_db):
-    """Create a PeakRepository instance for testing"""
-    return PeakRepository(test_db)
+    """Create a PeaksRepository instance for testing"""
+    return PeaksRepository(test_db)
 
 
 def test_get_all(test_repository, test_peaks):

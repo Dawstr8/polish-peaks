@@ -6,9 +6,9 @@ from fastapi import UploadFile
 from src.uploads.services.storage import StorageInterface
 
 
-class UploadService:
+class UploadsService:
     def __init__(self, storage: StorageInterface):
-        self._storage = storage
+        self.storage = storage
 
     async def save_file(self, file: UploadFile, content_type_prefix: str = None) -> str:
         """
@@ -29,7 +29,7 @@ class UploadService:
         ext = file.filename.split(".")[-1].lower()
         filename = f"{uuid.uuid4()}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{ext}"
 
-        return await self._storage.save_file(file, filename)
+        return await self.storage.save_file(file, filename)
 
     async def delete_file(self, filename: str) -> bool:
         """
@@ -41,4 +41,4 @@ class UploadService:
         Returns:
             bool: True if deletion was successful
         """
-        return await self._storage.delete_file(filename)
+        return await self.storage.delete_file(filename)

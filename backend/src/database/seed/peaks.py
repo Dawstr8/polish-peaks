@@ -5,7 +5,7 @@ Script to seed the database with sample Polish peaks
 from sqlmodel import Session, select
 
 from src.database.core import create_db_and_tables, engine
-from src.peaks.model import Peak
+from src.peaks.models import Peak
 
 
 def seed_peaks():
