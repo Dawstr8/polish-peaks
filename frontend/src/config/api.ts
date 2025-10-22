@@ -18,6 +18,10 @@ export const UPLOADS_BASE_URL =
  * @description These are the API endpoints used throughout the application
  */
 export const API_ENDPOINTS = {
+  auth: {
+    login: `${API_BASE_URL}/auth/login`,
+    register: `${API_BASE_URL}/auth/register`,
+  },
   photos: {
     getAll: (
       sort_by: string | null = null,
