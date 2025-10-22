@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
 
-from src.peaks.model import Peak
+from src.peaks.models import Peak
 
 
 class SummitPhoto(SQLModel, table=True):

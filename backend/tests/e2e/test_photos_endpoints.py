@@ -7,20 +7,20 @@ import pytest
 
 from main import app
 from src.photos import dependencies
-from src.uploads.service import UploadService
+from src.uploads.service import UploadsService
 from src.uploads.services.local_storage import LocalFileStorage
 
 
 @pytest.fixture(autouse=True)
-def override_upload_service(test_upload_dir):
+def override_uploads_service(test_upload_dir):
     """Override the upload service dependency to isolate filesystem writes."""
 
-    def _get_upload_service():
-        return UploadService(LocalFileStorage(upload_dir=str(test_upload_dir)))
+    def _get_uploads_service():
+        return UploadsService(LocalFileStorage(upload_dir=str(test_upload_dir)))
 
-    app.dependency_overrides[dependencies.get_upload_service] = _get_upload_service
+    app.dependency_overrides[dependencies.get_uploads_service] = _get_uploads_service
     yield
-    app.dependency_overrides.pop(dependencies.get_upload_service, None)
+    app.dependency_overrides.pop(dependencies.get_uploads_service, None)
 
 
 def test_get_all_photos_empty(client_with_db):

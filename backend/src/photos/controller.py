@@ -2,15 +2,15 @@ from typing import List, Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 
-from src.photos.dependencies import photo_service_dep
-from src.photos.model import SummitPhotoCreate, SummitPhotoRead
+from src.photos.dependencies import photos_service_dep
+from src.photos.models import SummitPhotoCreate, SummitPhotoRead
 
 router = APIRouter(prefix="/api/photos", tags=["photos"])
 
 
 @router.get("/", response_model=List[SummitPhotoRead], tags=["photos"])
 async def get_all_photos(
-    photo_service: photo_service_dep,
+    photos_service: photos_service_dep,
     sort_by: Optional[str] = Query(None, description="Field to sort by"),
     order: Optional[str] = Query(None, description="Sort order: 'asc' or 'desc'"),
 ):
@@ -25,7 +25,7 @@ async def get_all_photos(
         List[SummitPhotoRead]: List of all uploaded photos, with peak information, sorted as specified or in default order.
     """
     try:
-        return await photo_service.get_all_photos(sort_by=sort_by, order=order)
+        return await photos_service.get_all_photos(sort_by=sort_by, order=order)
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve photos: {str(e)}"
@@ -34,7 +34,7 @@ async def get_all_photos(
 
 @router.post("/", response_model=SummitPhotoRead, tags=["photos"])
 async def upload_photo(
-    photo_service: photo_service_dep,
+    photos_service: photos_service_dep,
     file: UploadFile = File(...),
     summit_photo_create: str = Form(...),
 ):
@@ -51,7 +51,7 @@ async def upload_photo(
     summit_photo_create = SummitPhotoCreate.model_validate_json(summit_photo_create)
 
     try:
-        return await photo_service.upload_photo(file, summit_photo_create)
+        return await photos_service.upload_photo(file, summit_photo_create)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -61,7 +61,7 @@ async def upload_photo(
 @router.get("/{photo_id}", response_model=SummitPhotoRead, tags=["photos"])
 async def get_photo_by_id(
     photo_id: int,
-    photo_service: photo_service_dep,
+    photos_service: photos_service_dep,
 ):
     """
     Get a specific photo by ID
@@ -72,7 +72,7 @@ async def get_photo_by_id(
     Returns:
         SummitPhotoRead: The requested photo object with peak information
     """
-    photo = await photo_service.get_photo_by_id(photo_id)
+    photo = await photos_service.get_photo_by_id(photo_id)
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
 
@@ -82,7 +82,7 @@ async def get_photo_by_id(
 @router.delete("/{photo_id}", response_model=dict, tags=["photos"])
 async def delete_photo(
     photo_id: int,
-    photo_service: photo_service_dep,
+    photos_service: photos_service_dep,
 ):
     """
     Delete an uploaded photo by ID
@@ -93,7 +93,7 @@ async def delete_photo(
     Returns:
         dict: Success status of the operation
     """
-    success = await photo_service.delete_photo(photo_id)
+    success = await photos_service.delete_photo(photo_id)
 
     if not success:
         raise HTTPException(status_code=404, detail="Photo not found")

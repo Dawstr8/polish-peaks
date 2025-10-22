@@ -4,7 +4,7 @@ Fixtures for peak-related tests
 
 import pytest
 
-from src.peaks.model import Peak
+from src.peaks.models import Peak
 
 
 @pytest.fixture

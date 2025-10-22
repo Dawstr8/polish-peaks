@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from src.peaks.model import Peak
+from src.peaks.models import Peak
 
 
 def test_get_peaks(client_with_db: TestClient, test_peaks: list[Peak]):

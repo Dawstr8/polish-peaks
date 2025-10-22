@@ -2,17 +2,17 @@ from typing import List, Optional
 
 from sqlmodel import Session, desc, select
 
-from src.photos.model import SummitPhoto
+from src.photos.models import SummitPhoto
 
 
-class PhotoRepository:
+class PhotosRepository:
     """
     Repository for SummitPhoto data access operations.
     """
 
     def __init__(self, db: Session):
         """
-        Initialize the PhotoRepository.
+        Initialize the PhotosRepository.
 
         Args:
             db: Database session

@@ -1,19 +1,19 @@
 """
-Tests for the PhotoRepository
+Tests for the PhotosRepository
 """
 
 from datetime import datetime
 
 import pytest
 
-from src.photos.model import SummitPhoto
-from src.photos.repository import PhotoRepository
+from src.photos.models import SummitPhoto
+from src.photos.repository import PhotosRepository
 
 
 @pytest.fixture()
-def test_photo_repository(test_db):
-    """Create a PhotoRepository instance for testing"""
-    return PhotoRepository(test_db)
+def test_photos_repository(test_db):
+    """Create a PhotosRepository instance for testing"""
+    return PhotosRepository(test_db)
 
 
 @pytest.fixture()
@@ -54,7 +54,7 @@ def test_photos(test_db, test_peaks, peak_coords):
     return photos
 
 
-def test_save(test_photo_repository, test_peaks):
+def test_save(test_photos_repository, test_peaks):
     """Test saving a new summit photo"""
     new_photo = SummitPhoto(
         file_name="new_photo.jpg",
@@ -66,7 +66,7 @@ def test_save(test_photo_repository, test_peaks):
         peak_id=test_peaks[0].id,
     )
 
-    saved_photo = test_photo_repository.save(new_photo)
+    saved_photo = test_photos_repository.save(new_photo)
 
     assert saved_photo.id is not None
     assert saved_photo.file_name == "new_photo.jpg"
@@ -79,11 +79,11 @@ def test_save(test_photo_repository, test_peaks):
     assert saved_photo.peak.id == test_peaks[0].id
 
 
-def test_get_by_id(test_photo_repository, test_photos):
+def test_get_by_id(test_photos_repository, test_photos):
     """Test retrieving a summit photo by ID"""
     photo_id = test_photos[0].id
 
-    photo = test_photo_repository.get_by_id(photo_id)
+    photo = test_photos_repository.get_by_id(photo_id)
 
     assert photo is not None
     assert photo.file_name == "test1.jpg"
@@ -93,16 +93,16 @@ def test_get_by_id(test_photo_repository, test_photos):
     assert photo.peak.id == test_photos[0].peak_id
 
 
-def test_get_by_id_non_existent(test_photo_repository):
+def test_get_by_id_non_existent(test_photos_repository):
     """Test retrieving a non-existent summit photo by ID"""
-    non_existent_photo = test_photo_repository.get_by_id(999999)
+    non_existent_photo = test_photos_repository.get_by_id(999999)
 
     assert non_existent_photo is None
 
 
-def test_get_all(test_photo_repository, test_photos):
+def test_get_all(test_photos_repository, test_photos):
     """Test retrieving all summit photos"""
-    photos = test_photo_repository.get_all()
+    photos = test_photos_repository.get_all()
 
     assert photos is not None
     assert len(photos) >= 2
@@ -119,9 +119,9 @@ def test_get_all(test_photo_repository, test_photos):
     assert first_test_photo.peak.id == test_photos[0].peak_id
 
 
-def test_get_all_sorted_by_captured_at_asc(test_photo_repository, test_photos):
+def test_get_all_sorted_by_captured_at_asc(test_photos_repository, test_photos):
     """Test retrieving all summit photos sorted by captured_at ascending"""
-    photos = test_photo_repository.get_all(sort_by="captured_at", order="asc")
+    photos = test_photos_repository.get_all(sort_by="captured_at", order="asc")
 
     assert photos is not None
     assert len(photos) >= 2
@@ -132,9 +132,9 @@ def test_get_all_sorted_by_captured_at_asc(test_photo_repository, test_photos):
     assert captured_times == sorted(captured_times)
 
 
-def test_get_all_sorted_by_captured_at_desc(test_photo_repository, test_photos):
+def test_get_all_sorted_by_captured_at_desc(test_photos_repository, test_photos):
     """Test retrieving all summit photos sorted by captured_at descending"""
-    photos = test_photo_repository.get_all(sort_by="captured_at", order="desc")
+    photos = test_photos_repository.get_all(sort_by="captured_at", order="desc")
 
     assert photos is not None
     assert len(photos) >= 2
@@ -145,20 +145,20 @@ def test_get_all_sorted_by_captured_at_desc(test_photo_repository, test_photos):
     assert captured_times == sorted(captured_times, reverse=True)
 
 
-def test_delete(test_photo_repository, test_photos):
+def test_delete(test_photos_repository, test_photos):
     """Test deleting a summit photo"""
     photo_id = test_photos[0].id
-    photo = test_photo_repository.get_by_id(photo_id)
+    photo = test_photos_repository.get_by_id(photo_id)
     assert photo is not None
 
-    result = test_photo_repository.delete(photo_id)
+    result = test_photos_repository.delete(photo_id)
     assert result is True
 
-    photo = test_photo_repository.get_by_id(photo_id)
+    photo = test_photos_repository.get_by_id(photo_id)
     assert photo is None
 
 
-def test_delete_non_existent(test_photo_repository):
+def test_delete_non_existent(test_photos_repository):
     """Test deleting a non-existent summit photo"""
-    result = test_photo_repository.delete(999999)
+    result = test_photos_repository.delete(999999)
     assert result is False

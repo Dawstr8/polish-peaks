@@ -6,12 +6,12 @@ import pytest
 from fastapi import UploadFile
 from starlette.datastructures import Headers
 
-from src.uploads.service import UploadService
+from src.uploads.service import UploadsService
 
 
 @pytest.mark.asyncio
 async def test_save_photo_success(local_storage, mock_upload_file):
-    service = UploadService(local_storage)
+    service = UploadsService(local_storage)
 
     path = await service.save_file(mock_upload_file, content_type_prefix="image/")
 
@@ -21,7 +21,7 @@ async def test_save_photo_success(local_storage, mock_upload_file):
 
 @pytest.mark.asyncio
 async def test_save_photo_validates_content_type(local_storage):
-    service = UploadService(local_storage)
+    service = UploadsService(local_storage)
     fake_text = UploadFile(
         filename="note.txt",
         file=io.BytesIO(b"hello"),
@@ -36,7 +36,7 @@ async def test_save_photo_validates_content_type(local_storage):
 
 @pytest.mark.asyncio
 async def test_delete_photo_success(local_storage, mock_upload_file):
-    service = UploadService(local_storage)
+    service = UploadsService(local_storage)
     path = await service.save_file(mock_upload_file, content_type_prefix="image/")
     filename = os.path.basename(path)
 
@@ -48,7 +48,7 @@ async def test_delete_photo_success(local_storage, mock_upload_file):
 
 @pytest.mark.asyncio
 async def test_delete_photo_failure(local_storage):
-    service = UploadService(local_storage)
+    service = UploadsService(local_storage)
 
     deleted = await service.delete_file("nonexistent.jpg")
 

@@ -2,34 +2,30 @@ from typing import List, Optional
 
 from fastapi import UploadFile
 
-from src.peaks.service import PeakService
-from src.photos.model import SummitPhoto, SummitPhotoCreate
-from src.photos.repository import PhotoRepository
-from src.uploads.service import UploadService
+from src.photos.models import SummitPhoto, SummitPhotoCreate
+from src.photos.repository import PhotosRepository
+from src.uploads.service import UploadsService
 
 
-class PhotoService:
+class PhotosService:
     """
     Service for handling photo operations.
     """
 
     def __init__(
         self,
-        upload_service: UploadService,
-        peak_service: PeakService,
-        photo_repository: PhotoRepository,
+        uploads_service: UploadsService,
+        photos_repository: PhotosRepository,
     ):
         """
-        Initialize the PhotoService
+        Initialize the PhotosService
 
         Args:
-            upload_service: Service for handling file uploads and storage
-            peak_service: Service for finding and matching peaks
-            photo_repository: Repository for database operations on photos
+            uploads_service: Service for handling file uploads and storage
+            photos_repository: Repository for database operations on photos
         """
-        self._upload_service = upload_service
-        self._peak_service = peak_service
-        self._photo_repository = photo_repository
+        self.uploads_service = uploads_service
+        self.photos_repository = photos_repository
 
     async def upload_photo(
         self, file: UploadFile, summit_photo_create: SummitPhotoCreate
@@ -44,14 +40,14 @@ class PhotoService:
         Returns:
             SummitPhoto: The saved photo object with peak information
         """
-        path = await self._upload_service.save_file(file, content_type_prefix="image/")
+        path = await self.uploads_service.save_file(file, content_type_prefix="image/")
 
         photo = SummitPhoto(
             file_name=path.split("/")[-1],
             **summit_photo_create.model_dump(),
         )
 
-        saved_photo = self._photo_repository.save(photo)
+        saved_photo = self.photos_repository.save(photo)
 
         return saved_photo
 
@@ -65,7 +61,7 @@ class PhotoService:
         Returns:
             SummitPhoto with peak information if found, None otherwise
         """
-        return self._photo_repository.get_by_id(photo_id)
+        return self.photos_repository.get_by_id(photo_id)
 
     async def get_all_photos(
         self, sort_by: Optional[str] = None, order: Optional[str] = None
@@ -80,7 +76,7 @@ class PhotoService:
         Returns:
             List[SummitPhoto]: List of all photos with peak information
         """
-        return self._photo_repository.get_all(sort_by=sort_by, order=order)
+        return self.photos_repository.get_all(sort_by=sort_by, order=order)
 
     async def delete_photo(self, photo_id: int) -> bool:
         """
@@ -92,14 +88,14 @@ class PhotoService:
         Returns:
             bool: True if deletion was successful
         """
-        photo = self._photo_repository.get_by_id(photo_id)
+        photo = self.photos_repository.get_by_id(photo_id)
         if not photo:
             return False
 
-        file_deleted = await self._upload_service.delete_file(photo.file_name)
+        file_deleted = await self.uploads_service.delete_file(photo.file_name)
 
         if file_deleted:
-            db_deleted = self._photo_repository.delete(photo_id)
+            db_deleted = self.photos_repository.delete(photo_id)
             return db_deleted
 
         return False
