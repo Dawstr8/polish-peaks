@@ -30,3 +30,22 @@ def test_save_user_duplicate_email(test_users_repository):
         test_users_repository.save(saved_user)
 
     assert "Email is already in use" in str(exc.value)
+
+
+def test_get_by_email_existing_user(test_users_repository):
+    """Test getting an existing user by email."""
+    user = User(email="test@example.com", hashed_password="hash")
+    saved_user = test_users_repository.save(user)
+
+    retrieved_user = test_users_repository.get_by_email("test@example.com")
+
+    assert retrieved_user is not None
+    assert retrieved_user.id == saved_user.id
+    assert retrieved_user.email == "test@example.com"
+
+
+def test_get_by_email_non_existing_user(test_users_repository):
+    """Test getting a non-existing user by email returns None."""
+    retrieved_user = test_users_repository.get_by_email("nonexistent@example.com")
+
+    assert retrieved_user is None
