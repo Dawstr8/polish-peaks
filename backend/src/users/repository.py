@@ -1,4 +1,4 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from src.users.models import User
 
@@ -41,3 +41,17 @@ class UsersRepository:
 
         self.db.refresh(user)
         return user
+
+    def get_by_email(self, email: str) -> User | None:
+        """
+        Get a user by email.
+
+        Args:
+            email: Email of the user to retrieve
+
+        Returns:
+            User if found, else None
+        """
+        statement = select(User).where(User.email == email)
+
+        return self.db.exec(statement).first()
