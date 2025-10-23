@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from jwt import InvalidTokenError
 
+from src.auth.password_service import PasswordService
 from src.auth.service import AuthService
 from src.tokens.service import TokensService
 from src.users.models import User, UserCreate
@@ -29,16 +30,33 @@ def mock_tokens_service():
 
 
 @pytest.fixture
+def mock_password_service():
+    """Create a mock PasswordService"""
+    password_service = MagicMock()
+    password_service.get_hash.side_effect = lambda pwd: f"hashed_{pwd}"
+    password_service.verify.side_effect = (
+        lambda plain, hashed: hashed == f"hashed_{plain}"
+    )
+    return password_service
+
+
+@pytest.fixture
 def service(
-    mock_users_repository: UsersRepository, mock_tokens_service: TokensService
+    mock_users_repository: UsersRepository,
+    mock_tokens_service: TokensService,
+    mock_password_service: PasswordService,
 ) -> AuthService:
     """Create a AuthService with mocked dependencies"""
-    return AuthService(mock_users_repository, mock_tokens_service)
+    return AuthService(
+        mock_users_repository, mock_tokens_service, mock_password_service
+    )
 
 
-def test_authenticate_user_success(service, mock_users_repository):
+def test_authenticate_user_success(
+    service, mock_password_service, mock_users_repository
+):
     """Test successful user authentication."""
-    hashed_password = service.get_password_hash("correct_password")
+    hashed_password = mock_password_service.get_hash("correct_password")
     user = User(id=1, email="test@example.com", hashed_password=hashed_password)
     mock_users_repository.get_by_email.return_value = user
 
@@ -47,9 +65,11 @@ def test_authenticate_user_success(service, mock_users_repository):
     assert result == user
 
 
-def test_authenticate_user_wrong_password(service, mock_users_repository):
+def test_authenticate_user_wrong_password(
+    service, mock_password_service, mock_users_repository
+):
     """Test authentication with wrong password."""
-    hashed_password = service.get_password_hash("correct_password")
+    hashed_password = mock_password_service.get_hash("correct_password")
     user = User(id=1, email="test@example.com", hashed_password=hashed_password)
     mock_users_repository.get_by_email.return_value = user
 
@@ -81,10 +101,10 @@ async def test_register_user(service):
 
 
 def test_login_user_and_create_token_success(
-    service, mock_users_repository, mock_tokens_service
+    service, mock_users_repository, mock_tokens_service, mock_password_service
 ):
     """Test successful login and token creation."""
-    hashed_password = service.get_password_hash("correct_password")
+    hashed_password = mock_password_service.get_hash("correct_password")
     user = User(id=1, email="test@example.com", hashed_password=hashed_password)
     mock_users_repository.get_by_email.return_value = user
 

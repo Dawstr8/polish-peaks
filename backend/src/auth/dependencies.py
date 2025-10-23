@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from src.auth.password_service import PasswordService
 from src.auth.service import AuthService
 from src.database.core import db_dep
 from src.tokens.service import TokensService
@@ -12,22 +13,28 @@ from src.users.models import User
 from src.users.repository import UsersRepository
 
 
-def get_tokens_service():
-    """Provides a TokensService instance."""
-    return TokensService()
-
-
 def get_users_repository(db: db_dep) -> UsersRepository:
     """Provides a UsersRepository."""
     return UsersRepository(db)
 
 
+def get_tokens_service():
+    """Provides a TokensService instance."""
+    return TokensService()
+
+
+def get_password_service():
+    """Provides a PasswordService instance."""
+    return PasswordService()
+
+
 def get_service(
     users_repository: UsersRepository = Depends(get_users_repository),
     tokens_service: TokensService = Depends(get_tokens_service),
+    password_service: PasswordService = Depends(get_password_service),
 ) -> AuthService:
     """Provides a AuthService with all required dependencies."""
-    return AuthService(users_repository, tokens_service)
+    return AuthService(users_repository, tokens_service, password_service)
 
 
 auth_service_dep = Annotated[AuthService, Depends(get_service)]

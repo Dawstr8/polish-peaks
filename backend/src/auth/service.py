@@ -1,6 +1,6 @@
 from jwt import InvalidTokenError
-from pwdlib import PasswordHash
 
+from src.auth.password_service import PasswordService
 from src.tokens.models import AccessToken
 from src.tokens.service import TokensService
 from src.users.models import User, UserCreate
@@ -13,7 +13,10 @@ class AuthService:
     """
 
     def __init__(
-        self, users_repository: UsersRepository, tokens_service: TokensService
+        self,
+        users_repository: UsersRepository,
+        tokens_service: TokensService,
+        password_service: PasswordService,
     ):
         """
         Initialize the AuthService.
@@ -21,35 +24,11 @@ class AuthService:
         Args:
             users_repository: Repository for user data
             tokens_service: Service for token operations
+            password_service: Service for password hashing and verification
         """
         self.users_repository = users_repository
         self.tokens_service = tokens_service
-        self.password_hash = PasswordHash.recommended()
-
-    def get_password_hash(self, password: str) -> str:
-        """
-        Hash a password.
-
-        Args:
-            password: Plain text password
-
-        Returns:
-            Hashed password
-        """
-        return self.password_hash.hash(password)
-
-    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """
-        Verify a password against its hash.
-
-        Args:
-            plain_password: Plain text password
-            hashed_password: Hashed password
-
-        Returns:
-            True if password matches, False otherwise
-        """
-        return self.password_hash.verify(plain_password, hashed_password)
+        self.password_service = password_service
 
     def authenticate_user(self, email: str, password: str) -> User | None:
         """
@@ -66,7 +45,7 @@ class AuthService:
         if not user:
             return None
 
-        if not self.verify_password(password, user.hashed_password):
+        if not self.password_service.verify(password, user.hashed_password):
             return None
 
         return user
@@ -81,7 +60,7 @@ class AuthService:
         Returns:
             The created User object
         """
-        hashed_password = self.get_password_hash(user_create.password)
+        hashed_password = self.password_service.get_hash(user_create.password)
         user = User(hashed_password=hashed_password, **user_create.model_dump())
 
         return self.users_repository.save(user)
