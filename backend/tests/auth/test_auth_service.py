@@ -3,10 +3,10 @@ from unittest.mock import MagicMock
 import pytest
 from jwt import InvalidTokenError
 
+from src.auth.service import AuthService
 from src.tokens.service import TokensService
 from src.users.models import User, UserCreate
 from src.users.repository import UsersRepository
-from src.users.service import UsersService
 
 
 @pytest.fixture
@@ -31,9 +31,9 @@ def mock_tokens_service():
 @pytest.fixture
 def service(
     mock_users_repository: UsersRepository, mock_tokens_service: TokensService
-) -> UsersService:
-    """Create a UsersService with mocked dependencies"""
-    return UsersService(mock_users_repository, mock_tokens_service)
+) -> AuthService:
+    """Create a AuthService with mocked dependencies"""
+    return AuthService(mock_users_repository, mock_tokens_service)
 
 
 def test_authenticate_user_success(service, mock_users_repository):

@@ -1,15 +1,15 @@
-"""Dependency injection functions and annotations for the users module."""
+"""Dependency injection functions and annotations for the auth module."""
 
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from src.auth.service import AuthService
 from src.database.core import db_dep
 from src.tokens.service import TokensService
 from src.users.models import User
 from src.users.repository import UsersRepository
-from src.users.service import UsersService
 
 
 def get_tokens_service():
@@ -17,32 +17,32 @@ def get_tokens_service():
     return TokensService()
 
 
-def get_repository(db: db_dep) -> UsersRepository:
+def get_users_repository(db: db_dep) -> UsersRepository:
     """Provides a UsersRepository."""
     return UsersRepository(db)
 
 
 def get_service(
-    repository: UsersRepository = Depends(get_repository),
+    users_repository: UsersRepository = Depends(get_users_repository),
     tokens_service: TokensService = Depends(get_tokens_service),
-) -> UsersService:
-    """Provides a UsersService with all required dependencies."""
-    return UsersService(repository, tokens_service)
+) -> AuthService:
+    """Provides a AuthService with all required dependencies."""
+    return AuthService(users_repository, tokens_service)
 
 
-users_service_dep = Annotated[UsersService, Depends(get_service)]
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/token")
+auth_service_dep = Annotated[AuthService, Depends(get_service)]
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 async def get_current_user(
-    users_service: users_service_dep,
+    auth_service: auth_service_dep,
     token: Annotated[str, Depends(oauth2_scheme)],
 ) -> User:
     """
     Provides the current authenticated user.
     """
     try:
-        return users_service.get_current_user_from_token(token)
+        return auth_service.get_current_user_from_token(token)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

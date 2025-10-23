@@ -1,36 +1,36 @@
 from fastapi import APIRouter, HTTPException, status
 
-from src.tokens.models import AccessToken
-from src.users.dependencies import (
+from src.auth.dependencies import (
+    auth_service_dep,
     current_user_dep,
     oauth2_password_request_form_dep,
-    users_service_dep,
 )
+from src.tokens.models import AccessToken
 from src.users.models import UserCreate, UserRead
 
 router = APIRouter(
-    prefix="/api/users",
-    tags=["users"],
+    prefix="/api/auth",
+    tags=["auth"],
 )
 
 
-@router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user_create: UserCreate,
-    users_service: users_service_dep,
+    auth_service: auth_service_dep,
 ):
     """
     Register a new user.
 
     Args:
         user_create: Data for creating a new user
-        users_service: Users service
+        auth_service: An authentication service
 
     Returns:
         The created User object
     """
     try:
-        return await users_service.register_user(user_create)
+        return await auth_service.register_user(user_create)
 
     except ValueError as e:
         raise HTTPException(
@@ -40,7 +40,7 @@ async def register_user(
 
 
 @router.get("/me", response_model=UserRead)
-async def read_users_me(
+async def read_me(
     current_user: current_user_dep,
 ):
     """
@@ -55,17 +55,17 @@ async def read_users_me(
     return current_user
 
 
-@router.post("/token", response_model=AccessToken)
+@router.post("/login", response_model=AccessToken)
 async def login_for_access_token(
     form_data: oauth2_password_request_form_dep,
-    users_service: users_service_dep,
+    auth_service: auth_service_dep,
 ) -> AccessToken:
     """
     Login for access token.
 
     Args:
         form_data: OAuth2 form data
-        users_service: Users service
+        auth_service: An authentication service
 
     Returns:
         Access token
@@ -74,7 +74,7 @@ async def login_for_access_token(
         HTTPException: If credentials are invalid
     """
     try:
-        token = users_service.login_user_and_create_token(
+        token = auth_service.login_user_and_create_token(
             form_data.username, form_data.password
         )
 

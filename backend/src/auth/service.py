@@ -7,7 +7,7 @@ from src.users.models import User, UserCreate
 from src.users.repository import UsersRepository
 
 
-class UsersService:
+class AuthService:
     """
     Service for user operations.
     """
@@ -16,7 +16,7 @@ class UsersService:
         self, users_repository: UsersRepository, tokens_service: TokensService
     ):
         """
-        Initialize the UsersService.
+        Initialize the AuthService.
 
         Args:
             users_repository: Repository for user data
