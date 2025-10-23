@@ -65,22 +65,41 @@ class AuthService:
 
         return self.users_repository.save(user)
 
-    def login_user_and_create_token(self, email: str, password: str) -> Token:
+    def login_user_and_create_tokens(
+        self, email: str, password: str
+    ) -> tuple[str, str]:
         user = self.authenticate_user(email, password)
 
         if not user:
             raise ValueError("Incorrect email or password")
 
         access_token = self.tokens_service.create_access_token(email=user.email)
+        refresh_token = self.tokens_service.create_refresh_token(email=user.email)
 
-        return access_token
+        return access_token, refresh_token
 
-    def get_current_user_from_token(self, token: str) -> User:
+    def get_email_from_token(self, token: str) -> str:
+        """
+        Get email from JWT token.
+
+        Args:
+            token: JWT token
+        Returns:
+            Email extracted from the token
+        Raises:
+            ValueError: If the token is invalid
+        """
+        try:
+            return self.tokens_service.get_email_from_token(token)
+        except InvalidTokenError:
+            raise ValueError("Could not validate credentials")
+
+    def get_current_user_from_token(self, access_token: str) -> User:
         """
         Get the current user from JWT token.
 
         Args:
-            token: JWT token
+            access_token: JWT token
 
         Returns:
             Current user
@@ -88,13 +107,27 @@ class AuthService:
         Raises:
             ValueError: If token is invalid or user not found
         """
-        try:
-            email = self.tokens_service.get_email_from_token(token)
-        except InvalidTokenError:
-            raise ValueError("Could not validate credentials")
 
+        email = self.get_email_from_token(access_token)
         user = self.users_repository.get_by_email(email=email)
         if user is None:
             raise ValueError("Could not validate credentials")
 
         return user
+
+    def refresh_access_token(self, refresh_token: str) -> str:
+        """
+        Refresh the access token using a refresh token.
+
+        Args:
+            refresh_token: Refresh JWT token
+
+        Returns:
+            New access token
+
+        Raises:
+            ValueError: If refresh token is invalid
+        """
+        email = self.get_email_from_token(refresh_token)
+        new_access_token = self.tokens_service.create_access_token(email=email)
+        return new_access_token

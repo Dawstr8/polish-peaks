@@ -1,10 +1,16 @@
 from fastapi.testclient import TestClient
 
+BASE_URL = "/api/auth"
+REGISTER_ENDPOINT = f"{BASE_URL}/register"
+ME_ENDPOINT = f"{BASE_URL}/me"
+LOGIN_ENDPOINT = f"{BASE_URL}/login"
+REFRESH_ENDPOINT = f"{BASE_URL}/refresh"
+
 
 def test_register_user_success(client_with_db: TestClient):
     """Test registering a new user successfully"""
     response = client_with_db.post(
-        "/api/auth/register", json={"email": "user1@example.com", "password": "pass123"}
+        REGISTER_ENDPOINT, json={"email": "user1@example.com", "password": "pass123"}
     )
 
     assert response.status_code == 201
@@ -16,11 +22,11 @@ def test_register_user_success(client_with_db: TestClient):
 def test_register_user_duplicate_email(client_with_db: TestClient):
     """Test registering a user with a duplicate email"""
     client_with_db.post(
-        "/api/auth/register", json={"email": "user2@example.com", "password": "pass123"}
+        REGISTER_ENDPOINT, json={"email": "user2@example.com", "password": "pass123"}
     )
 
     response = client_with_db.post(
-        "/api/auth/register", json={"email": "user2@example.com", "password": "pass456"}
+        REGISTER_ENDPOINT, json={"email": "user2@example.com", "password": "pass456"}
     )
 
     assert response.status_code == 400
@@ -30,7 +36,7 @@ def test_register_user_duplicate_email(client_with_db: TestClient):
 def test_register_user_invalid_email(client_with_db: TestClient):
     """Test registering a user with invalid email format"""
     response = client_with_db.post(
-        "/api/auth/register", json={"email": "invalid-email", "password": "pass123"}
+        REGISTER_ENDPOINT, json={"email": "invalid-email", "password": "pass123"}
     )
 
     assert response.status_code == 422
@@ -39,16 +45,49 @@ def test_register_user_invalid_email(client_with_db: TestClient):
     assert any("email" in str(error) for error in data["detail"])
 
 
-def test_login_for_access_token_success(client_with_db: TestClient):
-    """Test successful login and token retrieval"""
-    client_with_db.post(
-        "/api/auth/register",
-        json={"email": "login_test@example.com", "password": "pass123"},
+def test_read_users_me_success(client_with_db: TestClient, logged_in_user):
+    """Test getting current user info with valid token"""
+    token = logged_in_user["token"]
+
+    response = client_with_db.get(
+        ME_ENDPOINT, headers={"Authorization": f"Bearer {token}"}
     )
 
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == logged_in_user["email"]
+    assert "created_at" in data
+
+
+def test_read_users_me_no_token(client_with_db: TestClient):
+    """Test accessing me endpoint without token"""
+    response = client_with_db.get(ME_ENDPOINT)
+
+    assert response.status_code == 401
+    data = response.json()
+    assert "Not authenticated" in data["detail"]
+
+
+def test_read_users_me_invalid_token(client_with_db: TestClient):
+    """Test accessing me endpoint with invalid token"""
+    response = client_with_db.get(
+        ME_ENDPOINT, headers={"Authorization": "Bearer invalid_token"}
+    )
+
+    assert response.status_code == 401
+    data = response.json()
+    assert "Could not validate credentials" in data["detail"]
+
+
+def test_login_for_access_token_success(client_with_db: TestClient, registered_user):
+    """Test successful login and token retrieval"""
+
     response = client_with_db.post(
-        "/api/auth/login",
-        data={"username": "login_test@example.com", "password": "pass123"},
+        LOGIN_ENDPOINT,
+        data={
+            "username": registered_user["email"],
+            "password": registered_user["password"],
+        },
     )
 
     assert response.status_code == 200
@@ -61,7 +100,7 @@ def test_login_for_access_token_success(client_with_db: TestClient):
 def test_login_for_access_token_invalid_credentials(client_with_db: TestClient):
     """Test login with invalid credentials"""
     response = client_with_db.post(
-        "/api/auth/login",
+        LOGIN_ENDPOINT,
         data={"username": "nonexistent@example.com", "password": "wrongpass"},
     )
 
@@ -70,45 +109,32 @@ def test_login_for_access_token_invalid_credentials(client_with_db: TestClient):
     assert "Incorrect email or password" in data["detail"]
 
 
-def test_read_users_me_success(client_with_db: TestClient):
-    """Test getting current user info with valid token"""
+def test_refresh_access_token_success(client_with_db: TestClient, logged_in_user):
+    """Test refreshing access token with valid refresh token"""
+    refresh_response = client_with_db.post(REFRESH_ENDPOINT)
 
-    client_with_db.post(
-        "/api/auth/register",
-        json={"email": "me_test@example.com", "password": "pass123"},
-    )
-
-    login_response = client_with_db.post(
-        "/api/auth/login",
-        data={"username": "me_test@example.com", "password": "pass123"},
-    )
-    token = login_response.json()["access_token"]
-
-    response = client_with_db.get(
-        "/api/auth/me", headers={"Authorization": f"Bearer {token}"}
-    )
-
-    assert response.status_code == 200
-    data = response.json()
-    assert data["email"] == "me_test@example.com"
-    assert "created_at" in data
+    assert refresh_response.status_code == 200
+    data = refresh_response.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+    assert isinstance(data["access_token"], str)
 
 
-def test_read_users_me_no_token(client_with_db: TestClient):
-    """Test accessing me endpoint without token"""
-    response = client_with_db.get("/api/auth/me")
+def test_refresh_access_token_no_refresh_token(client_with_db: TestClient):
+    """Test refreshing access token without refresh token"""
+    response = client_with_db.post(REFRESH_ENDPOINT)
 
     assert response.status_code == 401
     data = response.json()
-    assert "Not authenticated" in data["detail"]
+    assert "Refresh token missing" in data["detail"]
 
 
-def test_read_users_me_invalid_token(client_with_db: TestClient):
-    """Test accessing me endpoint with invalid token"""
-    response = client_with_db.get(
-        "/api/auth/me", headers={"Authorization": "Bearer invalid_token"}
-    )
+def test_refresh_access_token_invalid_refresh_token(client_with_db: TestClient):
+    """Test refreshing access token with invalid refresh token"""
+    client_with_db.cookies.set("refresh_token", "invalid_refresh_token")
+
+    response = client_with_db.post(REFRESH_ENDPOINT)
 
     assert response.status_code == 401
     data = response.json()
-    assert "Could not validate credentials" in data["detail"]
+    assert "Invalid refresh token" in data["detail"]
