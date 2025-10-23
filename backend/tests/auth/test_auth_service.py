@@ -5,7 +5,7 @@ from jwt import InvalidTokenError
 
 from src.auth.password_service import PasswordService
 from src.auth.service import AuthService
-from src.tokens.service import TokensService
+from src.auth.tokens_service import TokensService
 from src.users.models import User, UserCreate
 from src.users.repository import UsersRepository
 

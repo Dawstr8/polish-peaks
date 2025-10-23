@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 import jwt
 from jwt.exceptions import InvalidTokenError
 
+from src.auth.models import Token
 from src.config import JWT_SECRET_KEY
-from src.tokens.models import AccessToken
 
 
 class TokensService:
@@ -55,7 +55,7 @@ class TokensService:
     def create_access_token(
         self,
         email: str,
-    ) -> AccessToken:
+    ) -> Token:
         """
         Create an access token for a user.
 
@@ -64,13 +64,13 @@ class TokensService:
             expires_delta: Expiration time delta
 
         Returns:
-            AccessToken object containing the JWT token
+            Token object containing the JWT token
         """
         access_token = self.encode_data(
             {"sub": email}, timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
         )
 
-        return AccessToken(access_token=access_token, token_type="bearer")
+        return Token(access_token=access_token, token_type="bearer")
 
     def get_email_from_token(self, token: str) -> str:
         """

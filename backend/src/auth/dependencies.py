@@ -7,8 +7,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from src.auth.password_service import PasswordService
 from src.auth.service import AuthService
+from src.auth.tokens_service import TokensService
 from src.database.core import db_dep
-from src.tokens.service import TokensService
 from src.users.models import User
 from src.users.repository import UsersRepository
 
