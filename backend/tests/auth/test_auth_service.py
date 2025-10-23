@@ -100,7 +100,7 @@ async def test_register_user(service):
     assert user.hashed_password != "password123"
 
 
-def test_login_user_and_create_token_success(
+def test_login_user_and_create_tokens_success(
     service, mock_users_repository, mock_tokens_service, mock_password_service
 ):
     """Test successful login and token creation."""
@@ -109,24 +109,31 @@ def test_login_user_and_create_token_success(
     mock_users_repository.get_by_email.return_value = user
 
     mock_access_token = MagicMock()
+    mock_refresh_token = MagicMock()
     mock_tokens_service.create_access_token.return_value = mock_access_token
+    mock_tokens_service.create_refresh_token.return_value = mock_refresh_token
 
-    result = service.login_user_and_create_token("test@example.com", "correct_password")
+    result = service.login_user_and_create_tokens(
+        "test@example.com", "correct_password"
+    )
 
-    assert result == mock_access_token
-    mock_tokens_service.create_access_token.assert_called_once()
-    call_args = mock_tokens_service.create_access_token.call_args
-    assert call_args[1]["email"] == "test@example.com"
+    assert result == (mock_access_token, mock_refresh_token)
+    mock_tokens_service.create_access_token.assert_called_once_with(
+        email="test@example.com"
+    )
+    mock_tokens_service.create_refresh_token.assert_called_once_with(
+        email="test@example.com"
+    )
 
 
-def test_login_user_and_create_token_invalid_credentials(
+def test_login_user_and_create_tokens_invalid_credentials(
     service, mock_users_repository
 ):
     """Test login with invalid credentials raises ValueError."""
     mock_users_repository.get_by_email.return_value = None
 
     with pytest.raises(ValueError) as exc:
-        service.login_user_and_create_token("nonexistent@example.com", "password")
+        service.login_user_and_create_tokens("nonexistent@example.com", "password")
 
     assert "Incorrect email or password" in str(exc.value)
 
@@ -166,5 +173,35 @@ def test_get_current_user_from_token_user_not_found(
 
     with pytest.raises(ValueError) as exc:
         service.get_current_user_from_token("valid_token")
+
+    assert str(exc.value) == "Could not validate credentials"
+
+
+def test_refresh_access_token_success(service, mock_tokens_service):
+    """Test refreshing access token with valid refresh token."""
+    refresh_token = "valid_refresh_token"
+    email = "test@example.com"
+    new_access_token = "new_access_token"
+
+    mock_tokens_service.get_email_from_token.return_value = email
+    mock_tokens_service.create_access_token.return_value = new_access_token
+
+    result = service.refresh_access_token(refresh_token)
+
+    assert result == new_access_token
+    mock_tokens_service.get_email_from_token.assert_called_once_with(refresh_token)
+    mock_tokens_service.create_access_token.assert_called_once_with(email=email)
+
+
+def test_refresh_access_token_invalid_token(service, mock_tokens_service):
+    """Test refreshing access token with invalid refresh token raises ValueError."""
+    refresh_token = "invalid_refresh_token"
+
+    mock_tokens_service.get_email_from_token.side_effect = InvalidTokenError(
+        "Invalid token"
+    )
+
+    with pytest.raises(ValueError) as exc:
+        service.refresh_access_token(refresh_token)
 
     assert str(exc.value) == "Could not validate credentials"

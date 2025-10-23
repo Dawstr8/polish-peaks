@@ -12,13 +12,14 @@ from main import app
 from src.database.core import get_db
 from src.peaks.models import Peak
 from src.uploads.services.local_storage import LocalFileStorage
+from tests.auth.auth_fixtures import logged_in_user, registered_user
 from tests.peaks.peak_fixtures import peak_coords, peak_models
 
 
 @pytest.fixture
 def client():
     """Creates a TestClient instance for API testing"""
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="https://testserver") as test_client:
         yield test_client
 
 
@@ -34,7 +35,7 @@ def client_with_db(test_db):
 
     app.dependency_overrides[get_db] = override_get_db
 
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="https://testserver") as test_client:
         yield test_client
 
     app.dependency_overrides.clear()
