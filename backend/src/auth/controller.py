@@ -5,7 +5,7 @@ from src.auth.dependencies import (
     current_user_dep,
     oauth2_password_request_form_dep,
 )
-from src.tokens.models import AccessToken
+from src.auth.models import Token
 from src.users.models import UserCreate, UserRead
 
 router = APIRouter(
@@ -55,11 +55,11 @@ async def read_me(
     return current_user
 
 
-@router.post("/login", response_model=AccessToken)
+@router.post("/login", response_model=Token)
 async def login_for_access_token(
     form_data: oauth2_password_request_form_dep,
     auth_service: auth_service_dep,
-) -> AccessToken:
+) -> Token:
     """
     Login for access token.
 

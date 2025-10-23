@@ -1,8 +1,8 @@
 from jwt import InvalidTokenError
 
+from src.auth.models import Token
 from src.auth.password_service import PasswordService
-from src.tokens.models import AccessToken
-from src.tokens.service import TokensService
+from src.auth.tokens_service import TokensService
 from src.users.models import User, UserCreate
 from src.users.repository import UsersRepository
 
@@ -65,7 +65,7 @@ class AuthService:
 
         return self.users_repository.save(user)
 
-    def login_user_and_create_token(self, email: str, password: str) -> AccessToken:
+    def login_user_and_create_token(self, email: str, password: str) -> Token:
         user = self.authenticate_user(email, password)
 
         if not user:

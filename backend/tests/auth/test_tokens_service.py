@@ -3,8 +3,8 @@ from datetime import timedelta
 import pytest
 from jwt import InvalidTokenError
 
-from src.tokens.models import AccessToken
-from src.tokens.service import TokensService
+from src.auth.models import Token
+from src.auth.tokens_service import TokensService
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def test_create_access_token(tokens_service):
 
     access_token = tokens_service.create_access_token(email)
 
-    assert isinstance(access_token, AccessToken)
+    assert isinstance(access_token, Token)
     assert access_token.token_type == "bearer"
     assert isinstance(access_token.access_token, str)
     assert len(access_token.access_token) > 0
@@ -82,7 +82,7 @@ def test_create_access_token_without_expires_delta(tokens_service):
 
     access_token = tokens_service.create_access_token(email)
 
-    assert isinstance(access_token, AccessToken)
+    assert isinstance(access_token, Token)
     assert access_token.token_type == "bearer"
 
 
