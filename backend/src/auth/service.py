@@ -131,3 +131,11 @@ class AuthService:
         email = self.get_email_from_token(refresh_token)
         new_access_token = self.tokens_service.create_access_token(email=email)
         return new_access_token
+
+    def logout_user(self) -> None:
+        """
+        Handle user logout.
+        The method is a placeholder for potential future token invalidation logic.
+        Currently, token invalidation is handled by the client by removing the tokens.
+        """
+        pass

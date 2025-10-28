@@ -5,6 +5,7 @@ REGISTER_ENDPOINT = f"{BASE_URL}/register"
 ME_ENDPOINT = f"{BASE_URL}/me"
 LOGIN_ENDPOINT = f"{BASE_URL}/login"
 REFRESH_ENDPOINT = f"{BASE_URL}/refresh"
+LOGOUT_ENDPOINT = f"{BASE_URL}/logout"
 
 
 def test_register_user_success(client_with_db: TestClient):
@@ -138,3 +139,27 @@ def test_refresh_access_token_invalid_refresh_token(client_with_db: TestClient):
     assert response.status_code == 401
     data = response.json()
     assert "Invalid refresh token" in data["detail"]
+
+
+def test_logout_success(client_with_db: TestClient, logged_in_user):
+    """Test successful user logout"""
+    before_refresh_response = client_with_db.post(REFRESH_ENDPOINT)
+
+    response = client_with_db.post(LOGOUT_ENDPOINT)
+
+    after_refresh_response = client_with_db.post(REFRESH_ENDPOINT)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == "Successfully logged out"
+
+    assert before_refresh_response.status_code == 200
+    assert after_refresh_response.status_code == 401
+
+
+def test_logout_no_token(client_with_db: TestClient):
+    """Test logout without being logged in"""
+    response = client_with_db.post(LOGOUT_ENDPOINT)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == "Successfully logged out"
