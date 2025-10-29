@@ -1,8 +1,7 @@
-from jwt import InvalidTokenError
+from uuid import UUID
 
-from src.auth.models import Token
 from src.auth.password_service import PasswordService
-from src.auth.tokens_service import TokensService
+from src.sessions.repository import SessionsRepository
 from src.users.models import User, UserCreate
 from src.users.repository import UsersRepository
 
@@ -15,7 +14,7 @@ class AuthService:
     def __init__(
         self,
         users_repository: UsersRepository,
-        tokens_service: TokensService,
+        sessions_repository: SessionsRepository,
         password_service: PasswordService,
     ):
         """
@@ -23,11 +22,11 @@ class AuthService:
 
         Args:
             users_repository: Repository for user data
-            tokens_service: Service for token operations
+            sessions_repository: Repository for session management
             password_service: Service for password hashing and verification
         """
         self.users_repository = users_repository
-        self.tokens_service = tokens_service
+        self.sessions_repository = sessions_repository
         self.password_service = password_service
 
     def authenticate_user(self, email: str, password: str) -> User | None:
@@ -65,69 +64,54 @@ class AuthService:
 
         return self.users_repository.save(user)
 
-    def login_user_and_create_tokens(
-        self, email: str, password: str
-    ) -> tuple[str, str]:
+    def login_user(self, email: str, password: str) -> UUID:
+        """
+        Log in a user by authenticating their credentials and creating a new session.
+
+        Args:
+            email: User's email
+            password: User's plain text password
+
+        Returns:
+            UUID of the created session
+
+        Raises:
+            ValueError: If credentials are invalid
+        """
         user = self.authenticate_user(email, password)
-
         if not user:
-            raise ValueError("Incorrect email or password")
+            raise ValueError("Invalid credentials")
 
-        access_token = self.tokens_service.create_access_token(email=user.email)
-        refresh_token = self.tokens_service.create_refresh_token(email=user.email)
+        session = self.sessions_repository.create(user.id, expires_in_days=30)
+        return session.id
 
-        return access_token, refresh_token
-
-    def get_email_from_token(self, token: str) -> str:
+    def logout_user(self, session_id: UUID) -> None:
         """
-        Get email from JWT token.
+        Log out a user by invalidating their session.
 
         Args:
-            token: JWT token
-        Returns:
-            Email extracted from the token
-        Raises:
-            ValueError: If the token is invalid
+            session_id: UUID of the session to invalidate
         """
-        try:
-            return self.tokens_service.get_email_from_token(token)
-        except InvalidTokenError:
-            raise ValueError("Could not validate credentials")
+        self.sessions_repository.invalidate_by_id(session_id)
 
-    def get_current_user_from_token(self, access_token: str) -> User:
+    def get_current_user(self, session_id: UUID) -> User:
         """
-        Get the current user from JWT token.
+        Get the current authenticated user from a session ID.
 
         Args:
-            access_token: JWT token
+            session_id: UUID of the session
 
         Returns:
-            Current user
-
+            The authenticated User
         Raises:
-            ValueError: If token is invalid or user not found
+            ValueError: If session is invalid or expired
         """
+        session = self.sessions_repository.get_active_by_id(session_id)
+        if not session:
+            raise ValueError("Invalid or expired session")
 
-        email = self.get_email_from_token(access_token)
-        user = self.users_repository.get_by_email(email=email)
-        if user is None:
-            raise ValueError("Could not validate credentials")
+        user = self.users_repository.get_by_id(session.user_id)
+        if not user:
+            raise ValueError("User not found")
 
         return user
-
-    def refresh_access_token(self, refresh_token: str) -> str:
-        """
-        Refresh the access token using a refresh token.
-
-        Args:
-            refresh_token: Refresh JWT token
-
-        Returns:
-            New access token
-
-        Raises:
-            ValueError: If refresh token is invalid
-        """
-        email = self.get_email_from_token(refresh_token)
-        new_access_token = self.tokens_service.create_access_token(email=email)
-        return new_access_token

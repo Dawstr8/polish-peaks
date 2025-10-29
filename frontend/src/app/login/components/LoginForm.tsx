@@ -15,7 +15,6 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthClient } from "@/lib/auth/client";
-import { OAuth2PasswordRequest } from "@/lib/auth/types";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -38,8 +37,8 @@ export function LoginForm({ handleLoginSuccess }: LoginFormProps) {
   });
 
   const { mutate, isPending, isError, error } = useMutation({
-    mutationFn: (loginForm: OAuth2PasswordRequest) =>
-      AuthClient.login(loginForm),
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      AuthClient.login(email, password),
     onSuccess: () => {
       handleLoginSuccess();
     },
@@ -47,7 +46,7 @@ export function LoginForm({ handleLoginSuccess }: LoginFormProps) {
 
   const onSubmit = async (data: LoginFormData) => {
     mutate({
-      username: data.email,
+      email: data.email,
       password: data.password,
     });
   };

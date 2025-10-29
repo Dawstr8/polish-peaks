@@ -1,10 +1,12 @@
+from uuid import UUID
+
 from fastapi.testclient import TestClient
 
 BASE_URL = "/api/auth"
 REGISTER_ENDPOINT = f"{BASE_URL}/register"
 ME_ENDPOINT = f"{BASE_URL}/me"
 LOGIN_ENDPOINT = f"{BASE_URL}/login"
-REFRESH_ENDPOINT = f"{BASE_URL}/refresh"
+LOGOUT_ENDPOINT = f"{BASE_URL}/logout"
 
 
 def test_register_user_success(client_with_db: TestClient):
@@ -45,13 +47,9 @@ def test_register_user_invalid_email(client_with_db: TestClient):
     assert any("email" in str(error) for error in data["detail"])
 
 
-def test_read_users_me_success(client_with_db: TestClient, logged_in_user):
-    """Test getting current user info with valid token"""
-    token = logged_in_user["token"]
-
-    response = client_with_db.get(
-        ME_ENDPOINT, headers={"Authorization": f"Bearer {token}"}
-    )
+def test_read_me_success(client_with_db: TestClient, logged_in_user):
+    """Test getting current user info with valid session"""
+    response = client_with_db.get(ME_ENDPOINT)
 
     assert response.status_code == 200
     data = response.json()
@@ -59,8 +57,8 @@ def test_read_users_me_success(client_with_db: TestClient, logged_in_user):
     assert "created_at" in data
 
 
-def test_read_users_me_no_token(client_with_db: TestClient):
-    """Test accessing me endpoint without token"""
+def test_read_me_no_session(client_with_db: TestClient):
+    """Test accessing me endpoint without session cookie"""
     response = client_with_db.get(ME_ENDPOINT)
 
     assert response.status_code == 401
@@ -68,40 +66,42 @@ def test_read_users_me_no_token(client_with_db: TestClient):
     assert "Not authenticated" in data["detail"]
 
 
-def test_read_users_me_invalid_token(client_with_db: TestClient):
-    """Test accessing me endpoint with invalid token"""
-    response = client_with_db.get(
-        ME_ENDPOINT, headers={"Authorization": "Bearer invalid_token"}
+def test_read_me_invalid_session(client_with_db: TestClient):
+    """Test accessing me endpoint with invalid session"""
+    client_with_db.cookies.set(
+        "session_id", str(UUID("12345678-1234-5678-1234-567812345678"))
     )
+
+    response = client_with_db.get(ME_ENDPOINT)
 
     assert response.status_code == 401
     data = response.json()
-    assert "Could not validate credentials" in data["detail"]
+    assert "Invalid or expired session" in data["detail"]
 
 
-def test_login_for_access_token_success(client_with_db: TestClient, registered_user):
-    """Test successful login and token retrieval"""
+def test_login_with_session_success(client_with_db: TestClient, registered_user):
+    """Test successful login and session creation"""
 
     response = client_with_db.post(
         LOGIN_ENDPOINT,
         data={
-            "username": registered_user["email"],
+            "email": registered_user["email"],
             "password": registered_user["password"],
         },
     )
 
     assert response.status_code == 200
-    data = response.json()
-    assert "access_token" in data
-    assert data["token_type"] == "bearer"
-    assert isinstance(data["access_token"], str)
+    assert response.json() == {"message": "Login successful"}
+
+    assert "session_id" in response.cookies
+    assert response.cookies.get("session_id") is not None
 
 
-def test_login_for_access_token_invalid_credentials(client_with_db: TestClient):
+def test_login_with_session_invalid_credentials(client_with_db: TestClient):
     """Test login with invalid credentials"""
     response = client_with_db.post(
         LOGIN_ENDPOINT,
-        data={"username": "nonexistent@example.com", "password": "wrongpass"},
+        data={"email": "nonexistent@example.com", "password": "wrongpass"},
     )
 
     assert response.status_code == 401
@@ -109,32 +109,15 @@ def test_login_for_access_token_invalid_credentials(client_with_db: TestClient):
     assert "Incorrect email or password" in data["detail"]
 
 
-def test_refresh_access_token_success(client_with_db: TestClient, logged_in_user):
-    """Test refreshing access token with valid refresh token"""
-    refresh_response = client_with_db.post(REFRESH_ENDPOINT)
+def test_logout_success(client_with_db: TestClient, logged_in_user):
+    """Test successful logout and session invalidation"""
+    before_logout_me_response = client_with_db.get(ME_ENDPOINT)
 
-    assert refresh_response.status_code == 200
-    data = refresh_response.json()
-    assert "access_token" in data
-    assert data["token_type"] == "bearer"
-    assert isinstance(data["access_token"], str)
+    response = client_with_db.post(LOGOUT_ENDPOINT)
 
-
-def test_refresh_access_token_no_refresh_token(client_with_db: TestClient):
-    """Test refreshing access token without refresh token"""
-    response = client_with_db.post(REFRESH_ENDPOINT)
-
-    assert response.status_code == 401
-    data = response.json()
-    assert "Refresh token missing" in data["detail"]
-
-
-def test_refresh_access_token_invalid_refresh_token(client_with_db: TestClient):
-    """Test refreshing access token with invalid refresh token"""
-    client_with_db.cookies.set("refresh_token", "invalid_refresh_token")
-
-    response = client_with_db.post(REFRESH_ENDPOINT)
-
-    assert response.status_code == 401
-    data = response.json()
-    assert "Invalid refresh token" in data["detail"]
+    after_logout_me_response = client_with_db.get(ME_ENDPOINT)
+    assert response.status_code == 200
+    assert response.json() == {"message": "Logout successful"}
+    assert "session_id" not in response.cookies
+    assert before_logout_me_response.status_code == 200
+    assert after_logout_me_response.status_code == 401

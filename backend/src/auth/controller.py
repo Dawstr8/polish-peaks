@@ -1,12 +1,9 @@
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from uuid import UUID
 
-from src.auth.dependencies import (
-    auth_service_dep,
-    current_user_dep,
-    oauth2_password_request_form_dep,
-)
-from src.auth.models import Token
-from src.config import REFRESH_TOKEN_EXPIRE_DAYS
+from fastapi import APIRouter, Cookie, Form, HTTPException, Response, status
+from pydantic import EmailStr
+
+from src.auth.dependencies import auth_service_dep, current_user_dep
 from src.users.models import UserCreate, UserRead
 
 router = APIRouter(
@@ -56,80 +53,68 @@ async def read_me(
     return current_user
 
 
-@router.post("/login", response_model=Token)
-async def login_for_access_token(
+@router.post("/login")
+async def login_with_session(
     response: Response,
-    form_data: oauth2_password_request_form_dep,
     auth_service: auth_service_dep,
-) -> Token:
+    email: EmailStr = Form(...),
+    password: str = Form(...),
+):
     """
-    Login for access token.
+    Login with session cookie.
 
     Args:
-        form_data: OAuth2 form data
+        response: FastAPI response object
         auth_service: An authentication service
+        email: User's email
+        password: User's plain text password
 
     Returns:
-        Access token
+        Success message
 
     Raises:
         HTTPException: If credentials are invalid
     """
     try:
-        access_token, refresh_token = auth_service.login_user_and_create_tokens(
-            form_data.username, form_data.password
-        )
+        session_id = auth_service.login_user(email, password)
 
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
+        key="session_id",
+        value=str(session_id),
         httponly=True,
         secure=True,
         samesite="lax",
-        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        max_age=30 * 24 * 60 * 60,
     )
 
-    return Token(access_token=access_token, token_type="bearer")
+    return {"message": "Login successful"}
 
 
-@router.post("/refresh", response_model=Token)
-async def refresh_access_token(
-    request: Request,
+@router.post("/logout")
+async def logout_session(
+    response: Response,
     auth_service: auth_service_dep,
-) -> Token:
+    session_id: UUID = Cookie(None),
+):
     """
-    Refresh access token.
+    Logout user (session authentication).
 
     Args:
-        request: HTTP request
+        response: FastAPI response object
         auth_service: An authentication service
+        session_id: Session ID from cookie
 
     Returns:
-        New access token
+        Success message
     """
+    if session_id:
+        auth_service.logout_user(session_id=session_id)
 
-    refresh_token = request.cookies.get("refresh_token")
-    if not refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh token missing",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    try:
-        new_access_token = auth_service.refresh_access_token(refresh_token)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return Token(access_token=new_access_token, token_type="bearer")
+    response.delete_cookie(key="session_id")
+    return {"message": "Logout successful"}
