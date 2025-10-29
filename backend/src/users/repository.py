@@ -42,6 +42,20 @@ class UsersRepository:
         self.db.refresh(user)
         return user
 
+    def get_by_id(self, user_id: int) -> User | None:
+        """
+        Get a user by ID.
+
+        Args:
+            user_id: ID of the user to retrieve
+
+        Returns:
+            User if found, else None
+        """
+        statement = select(User).where(User.id == user_id)
+
+        return self.db.exec(statement).first()
+
     def get_by_email(self, email: str) -> User | None:
         """
         Get a user by email.
