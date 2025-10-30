@@ -4,7 +4,8 @@ import { useAuth } from "@/components/auth/AuthContext";
 import Logo from "./Logo";
 import HamburgerMenu from "./HamburgerMenu";
 import Navigation from "./Navigation";
-import Actions from "./Actions";
+import Profile from "./Profile";
+import CallToAction from "./CallToAction";
 
 export default function Topbar() {
   const { user } = useAuth();
@@ -15,10 +16,10 @@ export default function Topbar() {
         <div className="flex justify-between items-center h-16">
           <Logo />
           <Navigation className="hidden md:flex" listClassName="space-x-2" />
-          <Actions
-            className="hidden md:flex space-x-2 items-center justify-center"
-            user={user}
-          />
+          <div className="hidden md:flex space-x-2 items-center justify-center">
+            <Profile user={user} />
+            <CallToAction />
+          </div>
           <div className="md:hidden">
             <HamburgerMenu>
               <div className="flex flex-col space-y-4 mt-8">
@@ -26,7 +27,10 @@ export default function Topbar() {
                   listClassName="flex flex-col space-y-2 mx-4"
                   orientation="vertical"
                 />
-                <Actions user={user} className="flex flex-col space-y-2 mx-4" />
+                <div className="flex flex-col space-y-2 mx-4">
+                  <CallToAction />
+                  <Profile user={user} />
+                </div>
               </div>
             </HamburgerMenu>
           </div>

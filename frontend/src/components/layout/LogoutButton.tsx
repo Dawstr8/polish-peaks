@@ -1,8 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthContext";
 import { AuthClient } from "@/lib/auth/client";
+import { cn } from "@/lib/utils";
+import { LogOut } from "lucide-react";
 
 export interface LogoutButtonProps {
   className?: string;
@@ -15,10 +16,13 @@ export default function LogoutButton({ className }: LogoutButtonProps) {
     await AuthClient.logout();
     logout();
   };
-
   return (
-    <Button className={className} variant="outline" onClick={handleSignOut}>
+    <button
+      className={cn("flex gap-2 items-center justify-center", className)}
+      onClick={handleSignOut}
+    >
+      <LogOut className="h-4 w-4" />
       Sign Out
-    </Button>
+    </button>
   );
 }
