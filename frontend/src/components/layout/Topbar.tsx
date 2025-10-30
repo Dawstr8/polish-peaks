@@ -1,17 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/components/auth/AuthContext";
-import { Menu } from "lucide-react";
 import Logo from "./Logo";
-import { navigation } from "@/config/navigation";
-import LogoutButton from "@/components/layout/LogoutButton";
+import HamburgerMenu from "./HamburgerMenu";
+import Navigation from "./Navigation";
+import Actions from "./Actions";
 
 export default function Topbar() {
-  const pathname = usePathname();
   const { user } = useAuth();
 
   return (
@@ -19,88 +14,22 @@ export default function Topbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Logo />
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-2">
-            {navigation.map((route) => {
-              const isActive = pathname === route.href;
-
-              return (
-                <Button
-                  key={route.name}
-                  asChild
-                  variant={isActive ? "default" : "ghost"}
-                >
-                  <Link href={route.href}>{route.name}</Link>
-                </Button>
-              );
-            })}
-          </nav>
-
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center space-x-2">
-            {user ? (
-              <>
-                <span className="text-sm text-muted-foreground">
-                  {user.email}
-                </span>
-                <LogoutButton />
-              </>
-            ) : (
-              <Button asChild variant="outline">
-                <Link href="/login">Sign In</Link>
-              </Button>
-            )}
-
-            {/* Upload Button */}
-            <Button asChild>
-              <Link href="/upload">Share Your Summit</Link>
-            </Button>
-          </div>
-
-          {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px]">
+          <Navigation className="hidden md:flex" listClassName="space-x-2" />
+          <Actions
+            className="hidden md:flex space-x-2 items-center justify-center"
+            user={user}
+          />
+          <div className="md:hidden">
+            <HamburgerMenu>
               <div className="flex flex-col space-y-4 mt-8">
-                {navigation.map((route) => {
-                  const isActive = pathname === route.href;
-                  return (
-                    <Button
-                      key={route.name}
-                      asChild
-                      variant={isActive ? "default" : "ghost"}
-                    >
-                      <Link href={route.href}>{route.name}</Link>
-                    </Button>
-                  );
-                })}
-
-                {user ? (
-                  <>
-                    <span className="text-sm text-muted-foreground px-4">
-                      {user.email}
-                    </span>
-                    <LogoutButton className="mt-2" />
-                  </>
-                ) : (
-                  <Button asChild variant="outline" className="mt-4">
-                    <Link href="/login">Sign In</Link>
-                  </Button>
-                )}
-
-                {/* Mobile Upload Button */}
-                <Button asChild className="mt-4">
-                  <Link href="/upload">Share Your Summit</Link>
-                </Button>
+                <Navigation
+                  listClassName="flex flex-col space-y-2 mx-4"
+                  orientation="vertical"
+                />
+                <Actions user={user} className="flex flex-col space-y-2 mx-4" />
               </div>
-            </SheetContent>
-          </Sheet>
+            </HamburgerMenu>
+          </div>
         </div>
       </div>
     </header>
