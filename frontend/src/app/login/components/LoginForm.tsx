@@ -15,6 +15,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthClient } from "@/lib/auth/client";
+import { useAuth } from "@/components/auth/AuthContext";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -28,6 +29,8 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ handleLoginSuccess }: LoginFormProps) {
+  const { login } = useAuth();
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -37,8 +40,17 @@ export function LoginForm({ handleLoginSuccess }: LoginFormProps) {
   });
 
   const { mutate, isPending, isError, error } = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      AuthClient.login(email, password),
+    mutationFn: async ({
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }) => {
+      const user = await AuthClient.login(email, password);
+      login(user);
+      return user;
+    },
     onSuccess: () => {
       handleLoginSuccess();
     },

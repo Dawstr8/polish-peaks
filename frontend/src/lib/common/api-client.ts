@@ -23,6 +23,10 @@ export class ApiClient {
   protected static async handleError(response: Response): Promise<Error> {
     let errorMessage = `Request failed with status: ${response.status}`;
 
+    if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent("unauthorized"));
+    }
+
     try {
       const errorData = (await response.json()) as ApiErrorResponse;
 

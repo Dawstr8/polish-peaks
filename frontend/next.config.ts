@@ -2,14 +2,19 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
+    unoptimized: true,
+  },
+  rewrites: async () => {
+    return [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8000",
-        pathname: "/uploads/**",
+        source: "/api/:path*",
+        destination: "http://localhost:8000/api/:path*",
       },
-    ],
+      {
+        source: "/uploads/:path*",
+        destination: "http://localhost:8000/uploads/:path*",
+      },
+    ];
   },
 };
 

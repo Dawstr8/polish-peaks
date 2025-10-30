@@ -4,12 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/components/auth/AuthContext";
 import { Menu } from "lucide-react";
 import Logo from "./Logo";
 import { navigation } from "@/config/navigation";
+import LogoutButton from "@/components/layout/LogoutButton";
 
 export default function Topbar() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -36,10 +39,18 @@ export default function Topbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-2">
-            {/* Login Button */}
-            <Button asChild variant="outline">
-              <Link href="/login">Sign In</Link>
-            </Button>
+            {user ? (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  {user.email}
+                </span>
+                <LogoutButton />
+              </>
+            ) : (
+              <Button asChild variant="outline">
+                <Link href="/login">Sign In</Link>
+              </Button>
+            )}
 
             {/* Upload Button */}
             <Button asChild>
@@ -70,10 +81,18 @@ export default function Topbar() {
                   );
                 })}
 
-                {/* Mobile Login Button */}
-                <Button asChild variant="outline" className="mt-4">
-                  <Link href="/login">Sign In</Link>
-                </Button>
+                {user ? (
+                  <>
+                    <span className="text-sm text-muted-foreground px-4">
+                      {user.email}
+                    </span>
+                    <LogoutButton className="mt-2" />
+                  </>
+                ) : (
+                  <Button asChild variant="outline" className="mt-4">
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                )}
 
                 {/* Mobile Upload Button */}
                 <Button asChild className="mt-4">
