@@ -7,11 +7,10 @@
  * Base API URL
  * @description This is the base URL for all API requests
  */
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 
 export const UPLOADS_BASE_URL =
-  process.env.NEXT_PUBLIC_UPLOADS_BASE_URL || "http://localhost:8000/uploads/";
+  process.env.NEXT_PUBLIC_UPLOADS_BASE_URL || "/uploads/";
 
 /**
  * API endpoints
@@ -21,6 +20,8 @@ export const API_ENDPOINTS = {
   auth: {
     login: `${API_BASE_URL}/auth/login`,
     register: `${API_BASE_URL}/auth/register`,
+    me: `${API_BASE_URL}/auth/me`,
+    logout: `${API_BASE_URL}/auth/logout`,
   },
   photos: {
     getAll: (
